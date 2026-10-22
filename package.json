@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.30.3",
   "engines": {
-    "node": ">=22.21.0"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "scripts": {
     "dev": "vite",
@@ -17,7 +17,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "verify": "pnpm lint && pnpm typecheck && pnpm test:coverage && vite build",
-    "sonar": "test -z \"$(git status --porcelain)\" || { echo 'sonar: commit or stash first (the analysis must describe HEAD)'; exit 1; }; pnpm test:coverage && { sonar-scanner; scripts/sonar-status.sh; }"
+    "sonar": "test -z \"$(git status --porcelain)\" || { echo 'sonar: commit or stash first (the analysis must describe HEAD)'; exit 1; }; pnpm test:coverage && { sonar-scanner; rc=$?; scripts/sonar-status.sh || rc=1; exit $rc; }"
   },
   "dependencies": {
     "react": "^19.3.1",

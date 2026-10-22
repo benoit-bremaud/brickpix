@@ -60,3 +60,11 @@
 
 ## Per-dimension summary
 - Design: tooling proportionate, no over-engineering; the purity guard is now compiler-enforced · Docs: 100 % presence, four stale claims about repository settings fixed at the source · Tests: one proportionate smoke test, setup hardened for the coming Canvas boundary · Security: actions pinned, least privilege, secrets scoped to the deploy steps, no secret in the tree · Correctness: `pnpm verify` green, no bug found; deploy concurrency and gate ordering fixed.
+
+## Addendum 2026-10-23 — PR #2 review round (Codex)
+
+- Scope: `package.json`, `README.md` (two Codex P2 findings on 94b321b). Checks run: design · docs · tests · security · correctness, `pnpm verify` green (coverage 100 %), gitleaks clean on full history.
+- Must: _None._
+- Should (applied): `package.json:20` `[correctness]` · `pnpm sonar` must also fail when only `scripts/sonar-status.sh` fails · `scripts/sonar-status.sh || rc=1`.
+- Nice (applied): `README.md:25` `[docs]` · state the exact Node range (22.22.2+, 24.15+ or 26+) rather than "22.22.2 or later".
+- Nice (not applied): `.github/workflows/*.yml` `node-version: 22` resolves to the latest 22.x, inside the range; pinning is not needed.
