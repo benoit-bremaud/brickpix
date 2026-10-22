@@ -22,7 +22,7 @@ and [docs/architecture/README.md](docs/architecture/README.md).
 
 ## Development
 
-Needs Node 22.22.2+, 24.15+ or 26+ (the range jsdom 30 supports, see `engines`) and pnpm 10 (`corepack enable` picks the pinned version).
+Needs Node 22.22.2+, 24.15+ or 26+ (the range jsdom 30 supports, see `engines`) and pnpm 10: `corepack enable` picks the pinned version on Node 22 and 24; Node 25+ no longer ships Corepack, so install it with `npm install -g pnpm@10` there.
 
 ```bash
 pnpm install
