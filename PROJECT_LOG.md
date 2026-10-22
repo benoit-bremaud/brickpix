@@ -12,7 +12,8 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   - Static web app, all client-side, over desktop (365) and mobile (315): 460/500.
   - Vite + React over Next.js (300) and vanilla TS (420): 500/500.
   - Vitest over Jest (350): 475/500.
-  - Cloudflare Pages over GitHub Pages (375) and Vercel (400): 480/500, for the preview per PR
+  - Cloudflare Pages over GitHub Pages (375) and Vercel (400): 480/500 (superseded the same
+    day, see the next bullet), for the preview per PR
     and a possible Worker for the BrickLink API later. Fallback: GitHub Pages, a drop-in change of
     one workflow.
   - Revised the same day: `wrangler pages project create` (wrangler 4.151) no longer creates a
@@ -29,6 +30,15 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   `src/domain`), CI verify, Gitleaks, CodeQL, dependency review, OSSF Scorecard, Dependabot, local
   SonarQube gate script, Cloudflare Workers deploy workflow, documentation skeleton.
 - Owner rule in `CLAUDE.md`: no validated UML study, no code. Brick 2 is the conception.
+- Local review gate on the bootstrap (`docs/architecture/review-local.md`): 1 code Must (the
+  domain purity lint also hit domain tests), 3 documentation Musts (repository settings behind
+  the text: squash-only merges, private vulnerability reporting, issue title), 14 Should. All
+  Must and the cheap Should fixed before the push: compiler-enforced domain purity
+  (`tsconfig.domain.json`), complexity lint, web test glob and Testing Library cleanup, deploy
+  runs the full gate with a concurrency group, Dependabot cooldown, Gitleaks least privilege.
+  Remaining Nice items are listed in the report. Gate: tests 1/1, coverage 100 %, docs 100 % (one
+  exported symbol), SonarQube passed, Gitleaks clean, QA smoke screenshot under
+  `docs/architecture/qa/`.
 - Pending after merge: repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
   (owner), then the custom domain under the owner's portfolio (`brickpix.benoitbremaud.fr`, a
   `routes` entry with `custom_domain` in `wrangler.jsonc`).

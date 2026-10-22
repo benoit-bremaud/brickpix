@@ -13,10 +13,8 @@ in `docs/architecture/`. Read them before changing anything.
 
 ## Status
 
-Brick 1 tooling in place (Vite + React + TypeScript strict, Vitest, ESLint dependency rule, CodeQL,
-Gitleaks, dependency review, Scorecard, local SonarQube gate, Cloudflare Workers static assets).
-No domain code
-yet. Checks: `pnpm verify`, then `pnpm sonar` after push.
+Brick 1 (bootstrap) done, see the README. No domain code yet. Checks: `pnpm verify`, then
+`pnpm sonar` after push.
 
 ## Project invariants
 

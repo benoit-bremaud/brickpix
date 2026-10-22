@@ -12,12 +12,12 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "typecheck": "tsc",
+    "typecheck": "tsc && tsc -p tsconfig.domain.json",
     "test": "vitest run",
+    "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test:coverage && pnpm build",
-    "sonar": "test -z \"$(git status --porcelain)\" && pnpm test:coverage && { sonar-scanner; scripts/sonar-status.sh; }",
-    "deploy": "pnpm run build && wrangler deploy"
+    "verify": "pnpm lint && pnpm typecheck && pnpm test:coverage && vite build",
+    "sonar": "test -z \"$(git status --porcelain)\" || { echo 'sonar: commit or stash first (the analysis must describe HEAD)'; exit 1; }; pnpm test:coverage && { sonar-scanner; scripts/sonar-status.sh; }"
   },
   "dependencies": {
     "react": "^19.3.1",

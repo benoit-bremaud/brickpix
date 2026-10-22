@@ -7,7 +7,7 @@ Closes #
 ## Conception
 
 - [ ] The change implements (or updates) a validated study under `docs/architecture/`, or touches no behaviour.
-- [ ] ADRs, traceability matrix and diagrams updated where needed.
+- [ ] Decisions and diagrams updated where needed.
 
 ## Checklist
 

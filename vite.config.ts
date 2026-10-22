@@ -1,9 +1,13 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
-export const config = defineConfig({
+export default defineConfig({
   plugins: [react()],
   test: {
+    // Leaked doubles must not make tests order-dependent (Canvas, FileReader and URL stubs ahead).
+    restoreMocks: true,
+    unstubGlobals: true,
+    unstubEnvs: true,
     projects: [
       {
         extends: true,
@@ -14,7 +18,7 @@ export const config = defineConfig({
         test: {
           name: "web",
           environment: "jsdom",
-          include: ["src/web/**/*.test.tsx"],
+          include: ["src/web/**/*.test.{ts,tsx}"],
           setupFiles: ["src/web/test-setup.ts"],
         },
       },
@@ -22,12 +26,10 @@ export const config = defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["src/**/*.test.{ts,tsx}", "src/web/main.tsx", "src/web/test-setup.ts"],
+      // Bootstrap and test wiring carry no logic; keep sonar.coverage.exclusions in sync.
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.d.ts", "src/web/main.tsx", "src/web/test-setup.ts"],
       reporter: ["text", "lcov"],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },
   },
 });
-
-// Vite and Vitest load the config file's default export; the framework imposes it.
-export default config;

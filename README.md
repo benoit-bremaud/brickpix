@@ -22,6 +22,8 @@ and [docs/architecture/README.md](docs/architecture/README.md).
 
 ## Development
 
+Needs Node 22.21 or later and pnpm 10 (`corepack enable` picks the pinned version).
+
 ```bash
 pnpm install
 pnpm dev        # local dev server
