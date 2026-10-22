@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "brickpix",
+  "compatibility_date": "2026-10-19",
+  "observability": {
+    "enabled": true
+  },
+  // Static site: the built `dist` folder is served as Worker assets, no Worker script.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  // Every uploaded version gets its own URL: that is the pull-request preview (= staging).
+  "preview_urls": true
+}
