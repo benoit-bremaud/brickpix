@@ -68,3 +68,4 @@
 - Should (applied): `package.json:20` `[correctness]` · `pnpm sonar` must also fail when only `scripts/sonar-status.sh` fails · `scripts/sonar-status.sh || rc=1`.
 - Nice (applied): `README.md:25` `[docs]` · state the exact Node range (22.22.2+, 24.15+ or 26+) rather than "22.22.2 or later".
 - Nice (not applied): `.github/workflows/*.yml` `node-version: 22` resolves to the latest 22.x, inside the range; pinning is not needed.
+- Codex round 3 (applied): `eslint.config.js` `[design]` · relative imports could climb out of `src/domain` · one config per nesting depth caps `../` at the directory level, probed with escaping, internal and package imports (all three outcomes as expected).

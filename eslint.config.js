@@ -25,6 +25,9 @@ const complexityRules = {
   "max-lines-per-function": ["error", { max: 40, skipBlankLines: true, skipComments: true }],
 };
 
+// Four levels is more than the planned domain layout needs; deeper files would escape the rule.
+const domainPurity = [1, 2, 3, 4].map(domainPurityAtDepth);
+
 export default tseslint.config(
   { ignores: ["dist", "coverage"] },
   js.configs.recommended,
@@ -49,10 +52,19 @@ export default tseslint.config(
     plugins: { "react-hooks": reactHooks },
     rules: reactHooks.configs.recommended.rules,
   },
-  {
-    files: ["src/domain/**/*.{ts,tsx}"],
-    // Tests import vitest; the purity rule guards production domain code only.
-    ignores: ["src/domain/**/*.test.{ts,tsx}"],
-    rules: { "no-restricted-imports": ["error", { patterns: domainForbidden }] },
-  },
+  ...domainPurity,
 );
+
+/**
+ * One config per nesting depth: a relative import may climb one `../` per directory level below
+ * src/domain and no further, so a domain module can only reach domain modules (which carry the
+ * same rule). Tests import vitest; the purity rule guards production domain code only.
+ */
+function domainPurityAtDepth(depth) {
+  const escapes = { regex: `^(\\.\\./){${depth}}`, message: "src/domain never imports outside the domain tree." };
+  return {
+    files: [`src/domain/${"*/".repeat(depth - 1)}*.{ts,tsx}`],
+    ignores: ["src/domain/**/*.test.{ts,tsx}"],
+    rules: { "no-restricted-imports": ["error", { patterns: [...domainForbidden, escapes] }] },
+  };
+}
