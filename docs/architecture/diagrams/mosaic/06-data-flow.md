@@ -16,11 +16,13 @@ flowchart LR
     Retouch --> Ret[("Retouched image 🔒")]
     Ret --> Resample["Resample to studs"]
     Size[/"Mosaic size"/] --> Resample
+    Size -- "crop ratio" --> Retouch
     Resample --> Quantise["Quantise"]
     Pal[("Palette (static)")] --> Quantise
     Dither[/"Dithering on/off"/] --> Quantise
     Quantise -- "PII: low-res likeness" --> Mosaic[("Mosaic 🔒<br/>palette indices")]
-    Mosaic --> Plan["Build plan per plate"] --> PlanOut[/"Plan on screen / print"/]
+    Mosaic --> Plan["Build plan per plate"] --> PlanOut[/"Plan on screen"/]
+    PlanOut -- "PII: likeness, user-directed print" --> Print[/"Printer / OS print dialog"/]
     Mosaic --> Bom["Bill of materials"] --> BomOut[/"Counts per colour, base plates"/]
     Bom --> Xml["BrickLink XML"] --> Dl[/"Downloaded file (user's disk)"/]
 
@@ -47,8 +49,10 @@ flowchart LR
 
 ## Notes
 
-- 🔒 and `PII:` edges mark data derived from the photo. None of it crosses the browser boundary:
+- 🔒 and `PII:` edges mark data derived from the photo. None of it crosses the browser boundary except the printed plan below:
   no upload, no storage, no analytics on image content.
+- Printing the plan is the one user-directed egress of photo-derived data (the plan pictures the
+  mosaic): it goes to the OS print dialog, outside the browser boundary, only on the user's action.
 - The BrickLink XML holds only part ids, colour ids and quantities; it leaves the browser only as
   a file the user chooses to download.
 - The mosaic itself is a low-resolution rendition of the photo; it is treated as sensitive too.
