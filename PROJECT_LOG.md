@@ -39,6 +39,14 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   Remaining Nice items are listed in the report. Gate: tests 1/1, coverage 100 %, docs 100 % (one
   exported symbol), SonarQube passed, Gitleaks clean, QA smoke screenshot under
   `docs/architecture/qa/`.
-- Pending after merge: repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`
-  (owner), then the custom domain under the owner's portfolio (`brickpix.benoitbremaud.fr`, a
+- **PR #2 merged** (`edd5644`) — chore(repo): bootstrap brickpix. Branch `chore/1-bootstrap`,
+  squash, closes #1. Review cycle: three Codex rounds, four P2 findings, all fixed and answered
+  inline (`pnpm sonar` now keeps the scanner exit status and fails when the status script fails;
+  `engines.node` is the range jsdom 30 declares, `^22.22.2 || ^24.15.0 || >=26.0.0`; README gives
+  the pnpm install path for Node 25+ without Corepack; the domain purity lint caps relative
+  imports per nesting depth so none can climb out of `src/domain`). Fourth round: no findings.
+  Repository secrets `CLOUDFLARE_API_TOKEN` (token `token-cloudflare-brickpix-ci-2026`, Workers
+  Scripts edit + Account Settings read + User Details read, one account, expires 2027-10-23) and
+  `CLOUDFLARE_ACCOUNT_ID` set the same day; PR preview and production deploy both green.
+- Pending: the custom domain under the owner's portfolio (`brickpix.benoitbremaud.fr`, a
   `routes` entry with `custom_domain` in `wrangler.jsonc`).
