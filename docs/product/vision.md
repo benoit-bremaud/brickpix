@@ -14,11 +14,12 @@ and build it.
 3. **Aperçu**: quantise to the palette of LEGO 1×1 round tiles (perceptual colour distance, optional
    dithering) and render the mosaic live, at the chosen size.
 4. **Commander mon kit**: build plan per 16×16 plate (numbered grid and colour legend), bill of
-   materials (tiles per colour, base plates, optional frame), BrickLink wanted list, cost estimate.
+   materials (tiles per colour, base plates), BrickLink wanted list. An optional frame and a cost
+   estimate come after V1 (another part catalogue, a price source).
 
 ## Sizes
 
-Any width and height in multiples of 16 studs: 48×48 (the LEGO Art standard, 3×3 plates), 64×64,
+Any width and height in multiples of 16 studs, from one plate: 48×48 (the LEGO Art standard, 3×3 plates), 64×64,
 96×64, and giant pieces assembled from many plates. The build plan is always split per plate so a
 giant mosaic is built one plate at a time.
 

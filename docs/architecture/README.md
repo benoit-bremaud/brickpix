@@ -1,7 +1,7 @@
 # Architecture
 
-No validated study yet. Brick 2 produces the conception for the first feature set, under
-`diagrams/<feature>/`, with the six UML diagram types (`NN-<type>.md`, Mermaid):
+Feature `mosaic` (photo to kit), brick 2: [`diagrams/mosaic/`](diagrams/mosaic/), six UML diagram
+types (`NN-<type>.md`, Mermaid). Use cases validated by the owner on 2026-10-23 (cost estimate out of V1):
 
 | NN | Type | Question it answers |
 |----|------|---------------------|
@@ -9,7 +9,7 @@ No validated study yet. Brick 2 produces the conception for the first feature se
 | 02 | sequence | How does a photo flow from import to the build plan? |
 | 03 | component | Which modules exist and who depends on whom? (`domain` pure, `web` on Canvas) |
 | 04 | class | Palette, tile, mosaic, plate, bill of materials |
-| 05 | state | The editor's states (empty, retouching, previewed, exported) |
+| 05 | state | The editor's states (empty, editing, kit ready) |
 | 06 | data-flow | Pixels in, tiles and lists out |
 
 Decisions will be recorded as MADR files under `decisions/` once the first one is taken in a study.

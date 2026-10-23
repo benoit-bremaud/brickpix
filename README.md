@@ -14,10 +14,11 @@ and [docs/architecture/README.md](docs/architecture/README.md).
 
 ## Planned (V1)
 
-- Retouch before quantisation: crop, brightness, contrast, saturation, sharpen.
+- Retouch before quantisation: crop, brightness, contrast, saturation, sharpen,
+  background simplification.
 - Quantisation to the real palette of LEGO 1×1 round tiles, perceptual colour distance, optional
   dithering, live preview.
-- Any mosaic size in multiples of 16×16 plates, from 48×48 up to giant pieces.
+- Any mosaic size in multiples of 16×16 plates, from 16×16 (one plate; 48×48 is the LEGO Art standard) up to giant pieces.
 - "Aperçu" then "Commander mon kit": build plan per plate, bill of materials, BrickLink wanted list.
 
 ## Development
