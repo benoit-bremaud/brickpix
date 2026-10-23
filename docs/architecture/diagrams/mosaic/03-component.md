@@ -11,7 +11,8 @@ package, no DOM, no React); `web` depends on `domain`, never the reverse.
 flowchart TB
     subgraph web["src/web (React + Canvas)"]
         Editor["Editor<br/>(state, screens)"]
-        ImageIO["canvas/imageIO<br/>(decode File, draw)"]
+        ImageIO["canvas/imageIO<br/>(decode File, draw photo)"]
+        Render["canvas/renderMosaic<br/>(round studs preview, numbered plate grids)"]
         Download["download<br/>(Blob URL)"]
     end
 
@@ -26,6 +27,7 @@ flowchart TB
     end
 
     Editor --> ImageIO
+    Editor --> Render
     Editor --> Download
     Editor --> Retouch
     Editor --> Resample

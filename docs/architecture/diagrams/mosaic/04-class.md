@@ -19,6 +19,7 @@ classDiagram
         +brightness: number
         +contrast: number
         +saturation: number
+        +sharpen: number
         +simplifyBackground: boolean
     }
     class Rect {
@@ -40,8 +41,6 @@ classDiagram
     class MosaicSize {
         +platesWide: number
         +platesHigh: number
-        +studsWide() number
-        +studsHigh() number
     }
     class Mosaic {
         +size: MosaicSize
@@ -52,6 +51,7 @@ classDiagram
         +column: number
         +row: number
         +cells: Uint8Array
+        +legend: PaletteColour[]
     }
     class BillOfMaterials {
         +tiles: TileLine[]
@@ -70,14 +70,17 @@ classDiagram
     Mosaic ..> BillOfMaterials : billOfMaterials()
     BillOfMaterials *-- "1..*" TileLine
     TileLine --> PaletteColour
+    PlatePlan --> "1..*" PaletteColour : legend
 ```
 
 ## Notes
 
 - `MosaicSize` counts base plates; studs are `16 × plates`. Both counts are integers ≥ 1.
 - `Mosaic.cells` holds one palette index per stud, row-major (`studsWide × studsHigh`).
+- `RetouchSettings.crop` keeps the `platesWide:platesHigh` ratio of the current size.
 - `PlatePlan.cells` is the 16 × 16 slice of one plate; plates are numbered row-major from the top
-  left, which is the build order.
+  left, which is the build order. `legend` lists the colours used on that plate, in palette order;
+  the plan grid prints each stud's legend number.
 - `BillOfMaterials.basePlates = platesWide × platesHigh`; tile quantities are exact counts (spares
   are the buyer's choice, not added silently).
 - The palette is a static data table in the domain; exact colour values are a domain spec, not

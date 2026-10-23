@@ -9,21 +9,20 @@ Lifecycle of the editor in `src/web`. Nothing is persisted: reloading the page r
 ```mermaid
 stateDiagram-v2
     [*] --> Empty
-    Empty --> Retouching : import photo [decoded]
+    Empty --> Editing : import photo [decoded]
     Empty --> Empty : import photo [decode failed] / show error
-    Retouching --> Retouching : adjust / crop
-    Retouching --> Previewed : Aperçu
-    Previewed --> Retouching : adjust / crop
-    Previewed --> Previewed : change size or dithering / re-quantise
-    Previewed --> KitReady : Commander mon kit
+    Editing --> Editing : size / retouch / dithering change / refresh preview (debounced)
+    Editing --> Editing : import photo [decode failed] / show error, keep current photo
+    Editing --> Editing : import photo [decoded] / reset retouch, keep size
+    Editing --> KitReady : Commander mon kit
     KitReady --> KitReady : export BrickLink list
-    KitReady --> Previewed : back to preview
-    Retouching --> Retouching : import another photo
-    Previewed --> Retouching : import another photo
-    KitReady --> Retouching : import another photo
+    KitReady --> Editing : back to editing
+    KitReady --> Editing : import photo [decoded] / reset retouch, keep size
 ```
 
 ## Notes
 
-- Importing another photo always restarts retouching from the new source; settings reset.
-- The kit is derived from the current mosaic; going back invalidates it.
+- `Editing` always shows the live preview («Aperçu») of the current photo, size and settings.
+- A new photo resets the retouch settings but keeps the chosen size (the gift's wall space does not
+  change with the photo).
+- The kit is derived from the current mosaic; going back to editing discards it.
