@@ -1,7 +1,7 @@
 # Architecture
 
-No validated study yet. Brick 2 produces the conception for the first feature set, under
-`diagrams/<feature>/`, with the six UML diagram types (`NN-<type>.md`, Mermaid):
+Feature `mosaic` (photo to kit), brick 2: [`diagrams/mosaic/`](diagrams/mosaic/), six UML diagram
+types (`NN-<type>.md`, Mermaid). Use cases validated by the owner on 2026-10-23 (cost estimate out of V1):
 
 | NN | Type | Question it answers |
 |----|------|---------------------|

@@ -14,7 +14,7 @@ and build it.
 3. **Aperçu**: quantise to the palette of LEGO 1×1 round tiles (perceptual colour distance, optional
    dithering) and render the mosaic live, at the chosen size.
 4. **Commander mon kit**: build plan per 16×16 plate (numbered grid and colour legend), bill of
-   materials (tiles per colour, base plates, optional frame), BrickLink wanted list, cost estimate.
+   materials (tiles per colour, base plates, optional frame), BrickLink wanted list. A cost estimate needs a price source and comes after V1.
 
 ## Sizes
 
