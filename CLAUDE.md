@@ -32,6 +32,7 @@ Bricks 1 (bootstrap) and 2 (UML study) done. Domain code: the round-tile palette
 
 - Product: `docs/product/` (vision, later personas, journeys and roadmap).
 - Diagrams: `docs/architecture/diagrams/<feature>/`, one folder per feature, six UML types.
+- Domain specs: `docs/architecture/specs/` (data tables the domain implements).
 - Decisions: `docs/architecture/decisions/` (MADR, one per file), once the first one exists.
 - Logbook: `PROJECT_LOG.md`, updated after every merge.
 - Kanban: GitHub Project #72 (`PVT_kwHOB8rwIc4BoTlZ`), Status Todo / In Progress / Done.

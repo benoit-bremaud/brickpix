@@ -29,7 +29,8 @@ lots).
 ## Colours
 
 The order is the palette order: it fixes the palette index stored in `Mosaic.cells` and the plate
-legend order. RGB is Rebrickable's screen approximation of the plastic.
+legend order. RGB is Rebrickable's screen approximation of the plastic. The LEGO colour id is provenance only; the
+domain type does not carry it.
 
 | # | id | Name (BrickLink) | RGB | BrickLink id | LEGO colour id | LEGO element id |
 |---|---|---|---|---|---|---|

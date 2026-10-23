@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+
 import { describe, expect, it } from 'vitest';
 
 import { ROUND_TILE_PALETTE } from './palette';
@@ -5,12 +7,20 @@ import { ROUND_TILE_PALETTE } from './palette';
 const colours = ROUND_TILE_PALETTE.colours;
 
 describe('ROUND_TILE_PALETTE', () => {
-  it('holds the 17 colours of the spec in palette order', () => {
-    expect(colours.map((c) => c.id)).toEqual([
-      'white', 'light-bluish-gray', 'dark-bluish-gray', 'black', 'red', 'orange',
-      'bright-light-orange', 'yellow', 'lime', 'medium-azure', 'blue', 'bright-pink', 'tan',
-      'dark-tan', 'medium-nougat', 'reddish-brown', 'dark-brown',
-    ]);
+  it('matches every row of the palette spec, in order', () => {
+    const spec = readFileSync(new URL('../../docs/architecture/specs/palette-round-tiles.md', import.meta.url), 'utf8');
+    const rows = [...spec.matchAll(/^\| \d+ \| `([a-z-]+)` \| ([^|]+?) \| `#([0-9A-F]{6})` \| (\d+) \| \d+ \| (\d+) \|$/gm)];
+
+    expect(rows).toHaveLength(17);
+    expect(colours).toEqual(
+      rows.map(([, id, name, hex, brickLink, element]) => ({
+        id,
+        name,
+        rgb: [0, 2, 4].map((i) => Number.parseInt(String(hex).slice(i, i + 2), 16)),
+        brickLinkColorId: Number(brickLink),
+        legoElementId: element,
+      })),
+    );
   });
 
   it('uses unique kebab-case ids, BrickLink ids, element ids and RGB values', () => {
@@ -29,14 +39,9 @@ describe('ROUND_TILE_PALETTE', () => {
     }
   });
 
-  it('matches spec rows for anchor colours', () => {
-    expect(colours[0]).toEqual({ id: 'white', name: 'White', rgb: [255, 255, 255], brickLinkColorId: 1, legoElementId: '4646844' });
-    expect(colours[16]).toEqual({ id: 'dark-brown', name: 'Dark Brown', rgb: [53, 33, 0], brickLinkColorId: 120, legoElementId: '6322813' });
-  });
-
   it('is frozen', () => {
     expect(Object.isFrozen(ROUND_TILE_PALETTE)).toBe(true);
     expect(Object.isFrozen(colours)).toBe(true);
-    expect(colours.every((c) => Object.isFrozen(c))).toBe(true);
+    expect(colours.every((c) => Object.isFrozen(c) && Object.isFrozen(c.rgb))).toBe(true);
   });
 });
