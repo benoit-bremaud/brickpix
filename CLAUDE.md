@@ -13,7 +13,8 @@ in `docs/architecture/`. Read them before changing anything.
 
 ## Status
 
-Brick 1 (bootstrap) done, see the README. No domain code yet. Checks: `pnpm verify`, then
+Bricks 1 (bootstrap) and 2 (UML study) done. Domain code: the round-tile palette
+(`src/domain/palette.ts`, spec `docs/architecture/specs/palette-round-tiles.md`). Checks: `pnpm verify`, then
 `pnpm sonar` after push.
 
 ## Project invariants
