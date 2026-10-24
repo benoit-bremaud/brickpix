@@ -63,3 +63,12 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   (plan, bill of materials, BrickLink XML), #10 retouch, #11 custom domain, #12 supplier study
   (order from the site), #13 cost estimate, #14 optional frame. Owner note on #7/#12: the palette
   must match the supplier's stocked colours.
+- **PR #16 merged** (`cbe8f16`) — feat(domain): palette of 1x1 round tiles, closes #7 (brick 3).
+  Spec `docs/architecture/specs/palette-round-tiles.md` and frozen table
+  `src/domain/palette.ts`: 17 opaque colours of BrickLink part 98138, in production (2025-26 sets)
+  and above 2,000 BrickLink lots, checked 2026-10-23 (BrickLink catalogue, Rebrickable CSV). Owner
+  MCDA: the 16 most stocked plus Dark Brown (465/500, against 16 colours 415 and ~35 colours 335).
+  LEGO Pick a Brick could not be checked; the supplier study (#12) revalidates the table. Local
+  gate: 0 Must, 2 Should fixed (deep freeze; the test parses the spec and checks all 17 rows).
+  **Waiver** (owner, 2026-10-24): Codex hit its usage limit again; merged on the local gate
+  (tests and docs 100 %, SonarQube passed, Gitleaks clean) and green CI.
