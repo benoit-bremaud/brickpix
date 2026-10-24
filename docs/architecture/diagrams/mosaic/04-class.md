@@ -83,5 +83,5 @@ classDiagram
   the plan grid prints each stud's legend number.
 - `BillOfMaterials.basePlates = platesWide × platesHigh`; tile quantities are exact counts (spares
   are the buyer's choice, not added silently).
-- The palette is a static data table in the domain; exact colour values are a domain spec, not
-  this diagram.
+- The palette is a static data table in the domain; exact colour values live in
+  [the palette spec](../../specs/palette-round-tiles.md), not this diagram.

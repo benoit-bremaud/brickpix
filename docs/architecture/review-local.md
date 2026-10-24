@@ -1,44 +1,33 @@
-# Local review — brickpix (branch docs/5-uml-study)
+# Local review — brickpix (branch docs/7-palette-spec)
 
 - Date: 2026-10-23
-- Commit: e133709 + review fixes (same branch)
-- Scope: branch diff main...HEAD (docs only: UML study `diagrams/mosaic/`, READMEs, vision)
-- Checks run: design (architecture-guardian, UML conformance) · docs · tests · security · correctness
-- Verdict: ship after fixes · Must 2 (fixed) · Should 7 (fixed) · Nice 6 (5 fixed, 1 kept)
+- Scope: branch diff main...HEAD (palette spec, `src/domain/palette.ts` and its tests, doc links)
+- Checks run: design · docs · tests (architecture-guardian, covering the three) · security and correctness (manual read: static data, no input, no I/O at runtime)
+- Verdict: ship · Must 0 · Should 2 (fixed) · Nice 5 (3 fixed)
 
-## Pre-merge gate (head SHA e133709)
+## Pre-merge gate
 | Step | Result |
 |---|---|
-| 1 Tests | ✅ 1/1 unit (no code change) |
-| 2 Coverage | tests 100 % stmts / 100 % branches / 100 % funcs / 100 % lines (floor 80) · docs 100 % (one exported symbol, unchanged) |
-| 3 SonarQube | ✅ PASSED |
-| 4 Secrets | ✅ gitleaks clean (`--all`) · no tracked .env · diff read: nothing sensitive |
-| 5 QA pass | ✅ smoke only (docs diff): `pnpm verify` build green; every Mermaid block renders with mermaid-cli 11.4.0 |
-- Gate: **GREEN — merge authorised**
+| 1 Tests | ✅ 5 unit (Vitest), build ok |
+| 2 Coverage | tests 100 % stmts / branches / funcs / lines · docs 100 % (every export documented) |
+| 3 SonarQube | ✅ PASSED (local server, re-run on the pushed head) |
+| 4 Secrets | ✅ gitleaks clean (main..HEAD) · no tracked .env · diff read: nothing sensitive |
+| 5 QA pass | ✅ smoke only: domain table not rendered yet (first consumer is #8); build passes |
+- Gate: **GREEN**
 
 ## 🔴 Must Have
-- `diagrams/mosaic/02-sequence-photo-to-kit.md` `[design]` · crop ratio depended on a size chosen later · size now drives the crop; size change re-runs the whole chain. Fixed.
-- `diagrams/mosaic/01-use-case.md` `[design|docs]` · sharpen, frame, plan legend dropped silently · owner 2026-10-23: sharpen and legend modelled, frame after V1 (vision updated). Fixed.
+_None._
 
 ## 🟡 Should Have
-- `01-use-case.md` `[design]` · «include» of size and extend-only Retouch · size is its own goal, adjustments listed in Notes. Fixed.
-- `01-use-case.md` `[docs]` · French use-case names · English names, French UI labels in a note. Fixed.
-- `05-state-editor.md` `[design]` · explicit Aperçu vs live preview · owner chose live (debounced); `Editing` state. Fixed.
-- `02-sequence-photo-to-kit.md` `[correctness]` · `quantise` lacked the size · signature takes `MosaicSize`. Fixed.
-- `docs/architecture/README.md`, `README.md` `[docs]` · state names, background step, minimum size · aligned. Fixed.
-- `02-sequence-photo-to-kit.md` `[design]` · algorithms unnamed · V1 defaults listed in Notes. Fixed.
+- `src/domain/palette.ts` `[design]` · shallow freeze left `rgb` tuples mutable, against the spec · fixed: tuples frozen, test checks it.
+- `src/domain/palette.test.ts` `[tests]` · only 2 of 17 rows checked against the spec · fixed: the test parses the spec table and compares every row.
 
 ## 🔵 Nice to Have
-- `06-data-flow.md` `[security]` · `PII:` edge labels, inputs inside the boundary, dithering input. Fixed.
-- `04-class.md` `[design]` · methods on plain data removed. Fixed.
-- `05-state-editor.md` `[design]` · failed decode while editing, size kept on new photo. Fixed.
-- `03-component.md` `[design]` · mosaic/plan renderer added. Fixed.
-- `02-sequence-photo-to-kit.md` `[correctness]` · resample return. Fixed.
-- `02-sequence-photo-to-kit.md` `[design]` · retouch performance at full resolution: kept under the deferred Web Worker note (measure first).
+- Fixed: literal extracted to `COLOURS`; id fields documented; `CLAUDE.md` lists `docs/architecture/specs/`; spec says the LEGO colour id is provenance only.
+- Open: `every(...).toBe(true)` assertions do not name the failing row (`palette.test.ts`).
 
 ## ⚪ Disagree / Intentional
-- `03-component.md` `[design]` · Editor calls domain functions directly, no ports · flat by design (architecture skill, YAGNI).
-- `04-class.md` `[design]` · plain types, no classes · intentional.
+- `Palette` single-field wrapper and `brickLinkColorId` spelling: both fixed by the validated `04-class.md`.
 
 ## Per-dimension summary
-- Design: invariants kept (pure domain, no egress); modelling consistency fixed · Docs: vision, READMEs and study aligned · Tests: no code · Security: no egress, PII flagged · Correctness: signatures consistent across diagrams.
+- Design: pure, flat static data, matches the class diagram · Docs: complete · Tests: spec drift guard in place · Security: no attack surface · Correctness: all 17 rows verified against the spec by script and by test.
