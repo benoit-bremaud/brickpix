@@ -4,19 +4,19 @@
 - Commit: eea8945
 - Scope: branch diff main...feat/8-import-size-preview
 - Checks run: design · docs · tests · security · correctness
-- Verdict: fix Must Have first · Must 1 · Should 8 · Nice 6
+- Verdict: ship — Must 1 · Should 8 · Nice 6, all Must and Should fixed in 9e7a6e0 and later
 
-## Pre-merge gate (head SHA eea8945)
+## Pre-merge gate (head SHA 0f8b970, rerun after the fixes)
 
 | Step | Result |
 |---|---|
-| 1 Tests | ✅ 47 unit + component (Vitest, domain and web projects) |
-| 2 Coverage | tests 100 % stmts / 94.4 % branches / 100 % funcs / 100 % lines (floor 80) · docs 100 % of exported symbols (floor 90) |
-| 3 SonarQube | ⚠️ not run yet: `pnpm sonar` posts the commit status and runs after the push (CONTRIBUTING.md) |
+| 1 Tests | ✅ 53 unit + component (Vitest, domain and web projects) |
+| 2 Coverage | tests 100 % stmts / 94.8 % branches / 100 % funcs / 100 % lines (floor 80) · docs 100 % of exported symbols (floor 90) |
+| 3 SonarQube | ✅ PASSED (first run failed on 2 new a11y issues in `Editor.tsx`, both fixed) |
 | 4 Secrets | ✅ gitleaks clean (main..HEAD) · no tracked .env · diff read: nothing sensitive |
-| 5 QA pass | ✅ pass on the dev server, report `docs/architecture/qa/2026-10-27-preview.md` (import, 3 × 3, 6 × 2 dithered, 8 × 8, console clean, no network egress) |
+| 5 QA pass | ✅ pass on the dev server, report `docs/architecture/qa/2026-10-27-preview.md` (import, 3 × 3, 6 × 2 dithered, 8 × 8, console clean, no network egress; after the fixes, a 6000 × 4000 PNG decodes downscaled and previews) |
 
-- Gate: **RED — SonarQube pending, Must open**
+- Gate: **GREEN on the local gate** — PR CI and reviews still to come
 
 ## 🔴 Must Have
 
