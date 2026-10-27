@@ -83,7 +83,20 @@ describe('flattenBackground', () => {
     // Left to right ramp, each step below the tolerance, the far end well outside it.
     const ramp = image(30, 6, (x) => [20 + x * 7, 20 + x * 7, 20 + x * 7]);
     const out = flattenBackground(ramp, 10);
+    expect(pixel(out, 0, 0)).toEqual(pixel(out, 1, 0)); // the dark end is flattened
     expect(pixel(out, 0, 0)).not.toEqual(pixel(out, 29, 0));
+  });
+
+  it('never seeds the bottom corners', () => {
+    // 2 × 4: a two-shade red bottom row. Seeded by its corners, it would be flattened to one shade.
+    const photo = image(2, 4, (x, y) => (y === 3 ? [shirt[0] + x * 2, shirt[1], shirt[2]] : sky));
+    expect(pixel(flattenBackground(photo, 10), 0, 3)).toEqual([...shirt]);
+  });
+
+  it.each([[1, 6], [6, 1]])('flattens a %i × %i strip without leaving the image', (width, height) => {
+    const strip = image(width, height, (x, y) => [sky[0] + ((x + y) % 2) * 2, sky[1], sky[2]]);
+    const out = flattenBackground(strip, 10);
+    expect(pixel(out, width - 1, height - 1)).toEqual(pixel(out, 0, 0));
   });
 
   it('is deterministic and runs through retouch only when enabled', () => {

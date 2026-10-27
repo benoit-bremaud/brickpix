@@ -10,15 +10,16 @@ export interface Background {
   readonly tolerance: number;
 }
 
+/** Bounds and default of the tolerance slider, in CIEDE2000 units (spec retouch.md). */
 export const BACKGROUND_TOLERANCE = Object.freeze({ min: 5, max: 20, default: 10 });
 
 const BLACK: Lab = [0, 0, 0];
 
-/** Indices of the top row, then the left and right columns (the bottom row is never seeded). */
+/** Indices of the top row, then the left and right columns (the bottom row, corners included, is never seeded). */
 function seeds(width: number, height: number): number[] {
   const list = new Set<number>();
   for (let x = 0; x < width; x++) list.add(x);
-  for (let y = 1; y < height; y++) list.add(y * width).add(y * width + width - 1);
+  for (let y = 1; y < height - 1; y++) list.add(y * width).add(y * width + width - 1);
   return [...list];
 }
 

@@ -13,6 +13,7 @@ export const PREVIEW_DEBOUNCE_MS = 150;
 /** What the canvas shows: the photo with its frame («Cadrer»), the photo before retouch, or the mosaic. */
 export type View = "frame" | "before" | "mosaic";
 
+/** The current photo, size, retouch and view the preview draws. */
 export interface PreviewInputs {
   readonly oriented: RgbaImage;
   readonly size: MosaicSize;
@@ -21,7 +22,10 @@ export interface PreviewInputs {
   readonly view: View;
 }
 
-/** Draws the preview: the photo at once, the mosaic debounced except for a new photo or view. */
+/**
+ * Draws the preview: the photo at once, the mosaic debounced except for a new photo or view.
+ * Draws nothing while `paused` (the kit is computed or shown). Returns the ref for the canvas.
+ */
 export function usePreview({ oriented, size, settings, dithering, view }: PreviewInputs, paused: boolean) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const shown = useRef<{ oriented: RgbaImage; view: View } | undefined>(undefined);

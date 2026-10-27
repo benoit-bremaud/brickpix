@@ -96,13 +96,19 @@ function pointerMove(session: Session, event: CanvasPointer): void {
 }
 
 function pointerUp(session: Session, event: CanvasPointer): void {
-  if (session.target?.framing === false) {
-    endPress(session);
-    session.target.onBefore(false);
-  }
+  // Always release «before»: «Cadrer» may have opened during the press.
+  endPress(session);
+  session.target?.onBefore(false);
   session.pointers.delete(event.pointerId);
   session.pinch = undefined;
   session.drag = undefined;
+  const [rest] = session.pointers.entries();
+  const target = session.target;
+  // The finger left after a pinch keeps panning from where it is.
+  if (rest !== undefined && target !== undefined) {
+    const { crop, settings, size } = target;
+    session.drag = { start: rest[1], framing: settings, crop, size, handle: undefined };
+  }
 }
 
 /** Arrow keys pan by KEY_PAN_SHARE of the frame, + and − zoom. Returns false for any other key. */
@@ -130,7 +136,7 @@ function keyDown(session: Session, event: KeyboardEvent<HTMLCanvasElement>): voi
 }
 
 function keyUp(session: Session, event: KeyboardEvent<HTMLCanvasElement>): void {
-  if (event.key === " " && session.target?.framing === false) session.target.onBefore(false);
+  if (event.key === " ") session.target?.onBefore(false);
 }
 
 function wheel(session: Session, event: WheelEvent): void {
@@ -153,8 +159,12 @@ export function useFrameGestures(canvas: RefObject<HTMLCanvasElement | null>, ta
   useEffect(() => {
     const element = canvas.current;
     const onWheel = (event: WheelEvent) => wheel(session.current, event);
+    const current = session.current;
     element?.addEventListener("wheel", onWheel, { passive: false });
-    return () => element?.removeEventListener("wheel", onWheel);
+    return () => {
+      element?.removeEventListener("wheel", onWheel);
+      endPress(current); // a long press must not fire after unmount
+    };
   }, [canvas]);
   // Each handler reads the session when the event fires, never during render.
   const up = (event: CanvasPointer) => pointerUp(session.current, event);

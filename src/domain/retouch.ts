@@ -16,6 +16,7 @@ export interface RetouchSettings extends Tone {
   readonly background: Background;
 }
 
+/** Every setting neutral: the mosaic equals the one without retouch (spec retouch.md). */
 export const NEUTRAL_RETOUCH: RetouchSettings = Object.freeze({
   framing: NEUTRAL_FRAMING,
   brightness: 0,

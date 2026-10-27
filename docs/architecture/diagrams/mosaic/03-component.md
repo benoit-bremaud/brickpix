@@ -10,16 +10,23 @@ package, no DOM, no React); `web` depends on `domain`, never the reverse.
 ```mermaid
 flowchart TB
     subgraph web["src/web (React + Canvas)"]
-        Editor["Editor<br/>(state, screens)"]
-        ImageIO["canvas/imageIO<br/>(decode File, draw photo)"]
+        Editor["Editor<br/>(import, size, screens)"]
+        Workspace["retouch/Workspace<br/>(toolbar, Cadrer, Ambiance, Fond panels)"]
+        Gestures["retouch/useFrameGestures<br/>(drag, handles, pinch, wheel, keys, long press)"]
+        Geometry["retouch/frameGeometry<br/>(handles, pan, zoom, stretch)"]
+        Preview["usePreview<br/>(photo at once, mosaic debounced)"]
+        Chain["chain<br/>(crop, resample, retouch, quantise)"]
+        ImageIO["canvas/imageIO<br/>(decode File)"]
+        Photo["canvas/renderPhoto<br/>(photo, frame, before)"]
         Render["canvas/renderMosaic<br/>(round studs preview)"]
         Kit["Kit<br/>(bill of materials table, HTML plate grids, print CSS)"]
         Export["export<br/>(clipboard copy, Blob URL download)"]
     end
 
     subgraph domain["src/domain (pure TypeScript)"]
-        Retouch["retouch<br/>(tone, sharpen, background, autoTone, moods)"]
-        Crop["crop<br/>(orient, cropFor, size from frame)"]
+        Crop["crop<br/>(orient, cropFor, stretchPlates)"]
+        Retouch["retouch<br/>(tone, sharpen, autoTone, moods)"]
+        Background["background<br/>(flattenBackground)"]
         Resample["resample"]
         Palette["palette<br/>(1 × 1 round tile colours)"]
         Quantise["quantise<br/>(nearest colour, dithering)"]
@@ -31,14 +38,27 @@ flowchart TB
     end
 
     Editor --> ImageIO
-    Editor --> Render
+    Editor --> Workspace
     Editor --> Kit
+    Workspace --> Gestures
+    Workspace --> Preview
+    Workspace --> Chain
+    Workspace --> Crop
+    Workspace --> Retouch
+    Gestures --> Geometry
+    Geometry --> Crop
+    Preview --> Chain
+    Preview --> Photo
+    Preview --> Render
+    Chain --> Crop
+    Chain --> Resample
+    Chain --> Retouch
+    Chain --> Quantise
+    Chain --> Palette
+    Retouch --> Background
+    Retouch --> Crop
+    Background --> Colour
     Kit --> Export
-    Editor --> Retouch
-    Editor --> Crop
-    Retouch --> Colour
-    Editor --> Resample
-    Editor --> Quantise
     Kit --> Plan
     Kit --> Bom
     Kit --> BrickLink
@@ -49,7 +69,6 @@ flowchart TB
     BrickLink --> Bom
     Plan --> Palette
 ```
-
 ## Notes
 
 - `mosaic` holds the shared domain types and size rules; every domain module may import it (arrows

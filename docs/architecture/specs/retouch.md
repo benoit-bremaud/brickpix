@@ -64,8 +64,8 @@ toggle (dithering moves here from the main controls).
 `{ enabled, tolerance }`, off by default, tolerance ΔE2000 in `5..20`, default 10. The tolerance
 slider shows only when enabled. Runs on the toned, sharpened studs:
 
-1. Seeds: every stud of the top row and of the left and right columns (not the bottom row, where a
-   subject usually rests).
+1. Seeds: every stud of the top row and of the left and right columns (not the bottom row, corners
+   included, where a subject usually rests).
 2. From each seed not yet in a region, grow a 4-connected region: a neighbour joins when its
    CIEDE2000 distance to the running mean colour (CIELAB) of the region is below `tolerance`.
 3. A region whose seeds cover at least 10 % of the seeded border studs is flattened to its mean

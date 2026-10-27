@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "../App";
 import * as renderModule from "../canvas/renderMosaic";
 import * as photoModule from "../canvas/renderPhoto";
+import * as chainModule from "../chain";
+import { PREVIEW_DEBOUNCE_MS } from "../usePreview";
 import { importPhoto, openToneMore, showMosaic, stubCanvas, tool, useFakeBrowser } from "../test-editor";
 import { LONG_PRESS_MS } from "./useFrameGestures";
 
@@ -113,6 +115,15 @@ describe("Background panel", () => {
     fireEvent.change(screen.getByLabelText(/Tolérance/), { target: { value: "15" } });
     expect(screen.getByLabelText(/Tolérance/)).toHaveValue("15");
   });
+
+  it("feeds the background setting into the mosaic chain", async () => {
+    const chain = vi.spyOn(chainModule, "computeMosaic");
+    await start();
+    tool("Fond");
+    fireEvent.click(screen.getByRole("switch", { name: "Fond uni" }));
+    act(() => vi.advanceTimersByTime(PREVIEW_DEBOUNCE_MS));
+    expect(chain.mock.lastCall?.[2].background).toEqual({ enabled: true, tolerance: 10 });
+  });
 });
 
 describe("Canvas gestures while framing", () => {
@@ -153,8 +164,21 @@ describe("Canvas gestures while framing", () => {
     fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 300, clientY: 240 });
     fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 400, clientY: 240 });
     expect(lastCrop()?.width).toBe(24);
-    fireEvent.pointerUp(canvas, { pointerId: 1 });
+  });
+});
+
+describe("Pinch gestures", () => {
+  useFakeBrowser();
+
+  it("keeps panning with the finger left after a pinch", async () => {
+    vi.spyOn(photoModule, "renderPhoto");
+    const canvas = await start();
+    fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 200, clientY: 240 });
+    fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 300, clientY: 240 });
+    fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 400, clientY: 240 }); // frame 24 × 24 at (20, 12)
     fireEvent.pointerUp(canvas, { pointerId: 2 });
+    fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 180, clientY: 240 });
+    expect(lastCrop()?.x).toBe(22);
   });
 });
 
@@ -184,5 +208,18 @@ describe("Before / after", () => {
     fireEvent.keyDown(canvas, { key: "Enter" });
     fireEvent.keyUp(canvas, { key: " " });
     expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
+  });
+
+  it("does not stay on the photo when «Cadrer» opens during the press", async () => {
+    const mosaic = vi.spyOn(renderModule, "renderMosaic");
+    const canvas = await start();
+    showMosaic();
+    fireEvent.pointerDown(canvas, { pointerId: 1 });
+    tool("Cadrer");
+    act(() => vi.advanceTimersByTime(LONG_PRESS_MS));
+    fireEvent.pointerUp(canvas, { pointerId: 1 });
+    mosaic.mockClear();
+    showMosaic();
+    expect(mosaic).toHaveBeenCalled();
   });
 });
