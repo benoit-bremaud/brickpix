@@ -124,7 +124,7 @@ export function Editor() {
           <figcaption id="preview-caption">Aperçu</figcaption>
           <canvas ref={canvas} className="preview">Aperçu de la mosaïque en tuiles rondes.</canvas>
           <button ref={orderButton} type="button" className="order" disabled={preparing} onClick={() => order(source, size, dithering)}>Commander mon kit</button>
-          <p role="status" className="status">{preparing ? "Préparation du kit…" : ""}</p>
+          <output className="status">{preparing ? "Préparation du kit…" : ""}</output>
         </figure>
       )}
       {kit !== undefined && <Kit mosaic={kit} onBack={back} />}
