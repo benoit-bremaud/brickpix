@@ -139,6 +139,10 @@ main {
   border-radius: var(--radius);
 }
 
+.bill-scroll {
+  overflow-x: auto;
+}
+
 .bill {
   width: 100%;
   border-collapse: collapse;
