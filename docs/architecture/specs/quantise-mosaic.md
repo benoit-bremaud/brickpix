@@ -16,7 +16,8 @@ Status: validated by the owner on 2026-10-27 (issue #8). Implements `resample` a
 
 - The crop is the largest rectangle of ratio `platesWide : platesHigh` centred in the photo
   (cover fit). Integer pixel bounds, at least 1 × 1.
-- #10 replaces it by the user's crop rectangle, clamped to the same ratio.
+- #10 replaces it by the user's framing ([retouch.md](retouch.md)); neutral framing gives this
+  crop.
 
 ## Decode (web)
 

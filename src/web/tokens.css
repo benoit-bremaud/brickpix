@@ -23,6 +23,10 @@
   --focus-ring-width: 2px;
   --plate-estimated-height: 40rem; /* placeholder size of an off-screen plate */
   --stud-gap: 1px;
+  --colour-frame-dim: rgb(0 0 0 / 55%); /* outside the frame, drawn on the canvas */
+  --colour-frame-edge: #fff;
+  --colour-photo-matte: #fff; /* under transparent pixels, as resample composites them */
+  --touch-target: 2.75rem; /* WCAG 2.5.8 comfortable target */
 }
 
 body {
@@ -55,9 +59,8 @@ main {
 
 .controls {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--space-3);
-  align-items: end;
   margin: var(--space-3) 0;
 }
 
@@ -94,10 +97,94 @@ main {
 
 .preview {
   display: block;
+  user-select: none;
+  -webkit-touch-callout: none; /* the long press shows the photo, not the image menu */
   width: 100%;
   height: auto;
   background: var(--colour-baseplate);
   border-radius: var(--radius);
+}
+
+.preview[data-view="frame"] {
+  touch-action: none; /* drag and pinch move the frame, not the page */
+  cursor: move;
+}
+
+.preview:focus-visible {
+  outline: var(--focus-ring-width) solid var(--colour-accent);
+  outline-offset: var(--focus-ring-width);
+}
+
+.hint,
+.size-summary {
+  margin: var(--space-2) 0 0;
+  color: var(--colour-muted);
+  font-size: 0.875rem;
+}
+
+.hint:empty {
+  display: none;
+}
+
+.panel,
+.panel-more,
+.toolbar,
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.panel-more {
+  flex-basis: 100%;
+}
+
+.toolbar {
+  justify-content: space-around;
+  margin: 0;
+  border: 0;
+  min-inline-size: 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--colour-border);
+}
+
+.panel button,
+.toolbar button,
+.stepper button {
+  min-width: var(--touch-target);
+  min-height: var(--touch-target);
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius);
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.toolbar button {
+  border-color: transparent;
+}
+
+.panel button[aria-pressed="true"],
+.toolbar button[aria-pressed="true"] {
+  border-color: var(--colour-accent);
+  color: var(--colour-accent);
+}
+
+.controls label.toggle {
+  flex-direction: row;
+  align-items: center;
+  min-height: var(--touch-target);
+}
+
+.slider {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 10rem;
+  color: var(--colour-muted);
 }
 
 .preview-figure {

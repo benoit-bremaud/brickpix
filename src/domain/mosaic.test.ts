@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { ciede2000, toLab, type Lab } from './colour';
-import { defaultCrop } from './crop';
+import { cropFor, NEUTRAL_FRAMING } from './crop';
 import { assertMosaicSize, DEFAULT_SIZE, MAX_PLATES, studsOf, type RgbaImage } from './mosaic';
 import { ROUND_TILE_PALETTE } from './palette';
 import { quantise } from './quantise';
@@ -29,17 +29,17 @@ describe('assertMosaicSize', () => {
   });
 });
 
-describe('defaultCrop', () => {
+describe('cropFor with the neutral framing (former default crop)', () => {
   it('centres a square in a landscape photo', () => {
-    expect(defaultCrop(400, 300, DEFAULT_SIZE)).toEqual({ x: 50, y: 0, width: 300, height: 300 });
+    expect(cropFor(400, 300, DEFAULT_SIZE, NEUTRAL_FRAMING)).toEqual({ x: 50, y: 0, width: 300, height: 300 });
   });
 
   it('centres a wide crop in a portrait photo', () => {
-    expect(defaultCrop(300, 400, { platesWide: 2, platesHigh: 1 })).toEqual({ x: 0, y: 125, width: 300, height: 150 });
+    expect(cropFor(300, 400, { platesWide: 2, platesHigh: 1 }, NEUTRAL_FRAMING)).toEqual({ x: 0, y: 125, width: 300, height: 150 });
   });
 
   it('never goes below 1 × 1', () => {
-    expect(defaultCrop(1, 1, { platesWide: 8, platesHigh: 1 })).toEqual({ x: 0, y: 0, width: 1, height: 1 });
+    expect(cropFor(1, 1, { platesWide: 8, platesHigh: 1 }, NEUTRAL_FRAMING)).toEqual({ x: 0, y: 0, width: 1, height: 1 });
   });
 });
 

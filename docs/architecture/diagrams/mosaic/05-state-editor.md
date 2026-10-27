@@ -27,6 +27,8 @@ stateDiagram-v2
 ## Notes
 
 - `Editing` always shows the live preview («Aperçu») of the current photo, size and settings.
+- In `Editing`, one retouch tool panel («Cadrer», «Ambiance», «Fond») is open at a time;
+  «Cadrer» opens after an import ([retouch.md](../../specs/retouch.md)).
 - A new photo resets the retouch settings but keeps the chosen size (the gift's wall space does not
   change with the photo).
 - «Commander mon kit» shows a busy message, lets the browser paint it (`requestAnimationFrame`, then
