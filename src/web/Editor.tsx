@@ -108,13 +108,14 @@ export function Editor() {
 
   return (
     <>
-      <label className="dropzone" data-over={over} onDragOver={(event) => { event.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={onDrop}>
+      <label className="dropzone" inert={preparing} data-over={over} onDragOver={(event) => { event.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={onDrop}>
         <span>Choisissez une photo ou déposez-la ici</span>
         <input type="file" accept="image/*" className="visually-hidden" onChange={(event) => void importFile(event.target.files?.[0])} />
       </label>
       {error !== undefined && <p role="alert" className="error">{error}</p>}
-      {/* Hidden, not unmounted, while the kit shows: the preview canvas keeps its drawing. */}
-      <div className="controls" hidden={kit !== undefined}>
+      {/* Hidden, not unmounted, while the kit shows: the preview canvas keeps its drawing. Inert while
+          the kit is prepared, so the kit matches the inputs on screen (spec kit.md). */}
+      <div className="controls" hidden={kit !== undefined} inert={preparing}>
         <label>Largeur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesWide} onChange={setPlates("platesWide")} /></label>
         <label>Hauteur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesHigh} onChange={setPlates("platesHigh")} /></label>
         <label><input type="checkbox" checked={dithering} onChange={(event) => setDithering(event.target.checked)} />Tramage</label>

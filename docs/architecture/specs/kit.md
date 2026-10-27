@@ -51,7 +51,7 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 - Buttons: «Commander mon kit», «Retour à l'édition», «Imprimer le plan», «Copier la liste
   BrickLink», «Télécharger la liste BrickLink» (explicit labels, WCAG 2.4.6 and 2.5.3).
 - «Commander mon kit» first shows «Préparation du kit…» (an `<output>` status message, the button
-  disabled), lets the browser paint it, then recomputes the mosaic from the current photo, size
+  disabled, the photo and size inputs inert), lets the browser paint it, then recomputes the mosaic from the current photo, size
   and dithering (it does not reuse the debounced preview) and shows the kit.
 - Each plate has `content-visibility: auto`, so only the plates on screen are laid out and
   painted; print still renders every plate. Measured on the production build at 8 × 8: 375 → 148 ms

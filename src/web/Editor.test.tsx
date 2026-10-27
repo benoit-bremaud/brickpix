@@ -193,6 +193,8 @@ describe("Editor kit busy state", () => {
     fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
     expect(screen.getByRole("status")).toHaveTextContent("Préparation du kit…");
     expect(screen.getByRole("button", { name: "Commander mon kit" })).toBeDisabled();
+    expect(screen.getByLabelText("Largeur (plaques)").closest(".controls")).toHaveAttribute("inert");
+    expect(screen.getByText(/Choisissez une photo/).closest("label")).toHaveAttribute("inert");
     expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
     act(() => vi.runAllTimers());
     expect(screen.getByRole("region", { name: "Votre kit" })).toBeInTheDocument();
