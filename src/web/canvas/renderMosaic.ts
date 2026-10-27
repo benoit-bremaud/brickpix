@@ -1,4 +1,4 @@
-import { studsOf, type Mosaic } from "../../domain/image";
+import { studsOf, type Mosaic } from "../../domain/mosaic";
 
 /** Pixels per stud on the preview canvas (CSS scales it to the available width). */
 export const STUD_PIXELS = 8;

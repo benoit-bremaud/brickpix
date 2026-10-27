@@ -1,4 +1,4 @@
-import { assertMosaicSize, studsOf, type MosaicSize, type Rect, type RgbaImage } from './image';
+import { assertMosaicSize, studsOf, type MosaicSize, type Rect, type RgbaImage } from './mosaic';
 
 /** Pixel of `image` at (x, y), composited over white, as [r, g, b] 0–255. */
 function opaquePixel(image: RgbaImage, x: number, y: number): [number, number, number] {
@@ -20,8 +20,9 @@ function averageArea(image: RgbaImage, crop: Rect, footprint: Rect): [number, nu
   let sumG = 0;
   let sumB = 0;
   let weight = 0;
-  const xEnd = footprint.x + footprint.width;
-  const yEnd = footprint.y + footprint.height;
+  // Float rounding can push the last footprint a hair past the crop; never read outside it.
+  const xEnd = Math.min(crop.width, footprint.x + footprint.width);
+  const yEnd = Math.min(crop.height, footprint.y + footprint.height);
   for (let y = Math.floor(footprint.y); y < yEnd; y++) {
     const wy = overlap(y, footprint.y, yEnd);
     for (let x = Math.floor(footprint.x); x < xEnd; x++) {

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type ChangeEvent, type DragEvent } from "react";
 
 import { defaultCrop } from "../domain/crop";
-import { DEFAULT_SIZE, MAX_PLATES, type Mosaic, type MosaicSize, type RgbaImage } from "../domain/image";
+import { DEFAULT_SIZE, MAX_PLATES, type Mosaic, type MosaicSize, type RgbaImage } from "../domain/mosaic";
 import { ROUND_TILE_PALETTE } from "../domain/palette";
-import { quantise } from "../domain/quantise";
+import { quantise, type QuantiseOptions } from "../domain/quantise";
 import { resample } from "../domain/resample";
 import { decodeFile } from "./canvas/imageIO";
 import { renderMosaic } from "./canvas/renderMosaic";
@@ -11,10 +11,10 @@ import { renderMosaic } from "./canvas/renderMosaic";
 /** Delay between the last size or dithering change and the preview refresh. */
 export const PREVIEW_DEBOUNCE_MS = 150;
 
-/** The photo-to-mosaic chain of spec quantise-mosaic.md. */
-export function computeMosaic(source: RgbaImage, size: MosaicSize, dithering: boolean): Mosaic {
+/** The photo-to-mosaic chain of spec quantise-mosaic.md: default crop, resample, quantise. */
+export function computeMosaic(source: RgbaImage, size: MosaicSize, options: QuantiseOptions): Mosaic {
   const studs = resample(source, defaultCrop(source.width, source.height, size), size);
-  return quantise(studs, size, ROUND_TILE_PALETTE, dithering);
+  return quantise(studs, size, ROUND_TILE_PALETTE, options);
 }
 
 function clampPlates(value: string): number {
@@ -30,7 +30,7 @@ function usePreview(source: RgbaImage | undefined, size: MosaicSize, dithering: 
     if (source === undefined) return;
     const draw = () => {
       shown.current = source;
-      if (canvas.current !== null) renderMosaic(canvas.current, computeMosaic(source, size, dithering));
+      if (canvas.current !== null) renderMosaic(canvas.current, computeMosaic(source, size, { dithering }));
     };
     if (shown.current !== source) {
       draw();
@@ -42,24 +42,34 @@ function usePreview(source: RgbaImage | undefined, size: MosaicSize, dithering: 
   return canvas;
 }
 
-/** Import, size and live preview («Aperçu») of the mosaic editor. */
-export function Editor() {
+/** The decoded photo and the last decode error; only the latest import wins. */
+function useImport() {
   const [source, setSource] = useState<RgbaImage>();
   const [error, setError] = useState<string>();
-  const [size, setSize] = useState<MosaicSize>(DEFAULT_SIZE);
-  const [dithering, setDithering] = useState(false);
-  const [over, setOver] = useState(false);
-  const canvas = usePreview(source, size, dithering);
+  const latestImport = useRef(0);
 
   const importFile = async (file: File | undefined) => {
     if (file === undefined) return;
+    const id = ++latestImport.current;
     try {
-      setSource(await decodeFile(file));
+      const image = await decodeFile(file);
+      if (id !== latestImport.current) return; // a newer import superseded this one
+      setSource(image);
       setError(undefined);
     } catch {
       setError("Impossible de lire cette image. Essayez un fichier JPEG, PNG ou WebP.");
     }
   };
+  return { source, error, importFile };
+}
+
+/** Import, size and live preview («Aperçu») of the mosaic editor. */
+export function Editor() {
+  const { source, error, importFile } = useImport();
+  const [size, setSize] = useState<MosaicSize>(DEFAULT_SIZE);
+  const [dithering, setDithering] = useState(false);
+  const [over, setOver] = useState(false);
+  const canvas = usePreview(source, size, dithering);
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
     setOver(false);

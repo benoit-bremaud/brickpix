@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ciede2000, toLab, type Lab } from './colour';
 import { defaultCrop } from './crop';
-import { assertMosaicSize, DEFAULT_SIZE, MAX_PLATES, studsOf, type RgbaImage } from './image';
+import { assertMosaicSize, DEFAULT_SIZE, MAX_PLATES, studsOf, type RgbaImage } from './mosaic';
 import { ROUND_TILE_PALETTE } from './palette';
 import { quantise } from './quantise';
 import { resample } from './resample';
@@ -108,7 +108,7 @@ describe('quantise', () => {
 
   it.each([false, true])('maps a palette colour to its own index everywhere (dithering %s)', (dithering) => {
     ROUND_TILE_PALETTE.colours.forEach((colour, index) => {
-      const mosaic = quantise(solid(16, 16, [...colour.rgb, 255]), size, ROUND_TILE_PALETTE, dithering);
+      const mosaic = quantise(solid(16, 16, [...colour.rgb, 255]), size, ROUND_TILE_PALETTE, { dithering });
       expect(mosaic.cells.every((cell) => cell === index)).toBe(true);
     });
   });
@@ -117,27 +117,47 @@ describe('quantise', () => {
     const studs = studsOf({ platesWide: 2, platesHigh: 1 });
     const image = solid(studs.width, studs.height, [0, 0, 0, 255]);
     for (let p = 0; p < studs.width * studs.height; p++) image.data.set([(p * 37) % 256, (p * 91) % 256, (p * 13) % 256], p * 4);
-    const mosaic = quantise(image, { platesWide: 2, platesHigh: 1 }, ROUND_TILE_PALETTE, true);
+    const mosaic = quantise(image, { platesWide: 2, platesHigh: 1 }, ROUND_TILE_PALETTE, { dithering: true });
     expect(mosaic.cells).toHaveLength(512);
     expect(mosaic.cells.every((cell) => cell < ROUND_TILE_PALETTE.colours.length)).toBe(true);
-    expect(quantise(image, { platesWide: 2, platesHigh: 1 }, ROUND_TILE_PALETTE, true).cells).toEqual(mosaic.cells);
+    expect(quantise(image, { platesWide: 2, platesHigh: 1 }, ROUND_TILE_PALETTE, { dithering: true }).cells).toEqual(mosaic.cells);
   });
 
   it('dithers a mid grey into a mix of colours, flat without dithering', () => {
     const grey = solid(16, 16, [130, 130, 130, 255]);
-    const flat = new Set(quantise(grey, size, ROUND_TILE_PALETTE, false).cells);
-    const dithered = new Set(quantise(grey, size, ROUND_TILE_PALETTE, true).cells);
+    const flat = new Set(quantise(grey, size, ROUND_TILE_PALETTE, { dithering: false }).cells);
+    const dithered = new Set(quantise(grey, size, ROUND_TILE_PALETTE, { dithering: true }).cells);
     expect(flat.size).toBe(1);
     expect(dithered.size).toBeGreaterThan(1);
+  });
+
+});
+
+describe('quantise with dithering', () => {
+  const size = { platesWide: 1, platesHigh: 1 };
+
+  it('keeps the mean tone when dithering (error diffusion conserves it)', () => {
+    const blackWhite = { colours: ROUND_TILE_PALETTE.colours.filter(({ id }) => id === 'black' || id === 'white') };
+    const dark = solid(16, 16, [64, 64, 64, 255]);
+    const cells = quantise(dark, size, blackWhite, { dithering: true }).cells;
+    const whiteShare = cells.filter((cell) => cell === 0).length / cells.length;
+    // Black is #05131D, not #000: the expected share of white is about (64 - 15) / (255 - 15).
+    expect(whiteShare).toBeGreaterThan(0.15);
+    expect(whiteShare).toBeLessThan(0.3);
+    expect(new Set(quantise(dark, size, blackWhite, { dithering: false }).cells)).toEqual(new Set([1]));
+  });
+
+  it('rejects an empty palette', () => {
+    expect(() => quantise(solid(16, 16, [0, 0, 0, 255]), size, { colours: [] }, { dithering: false })).toThrow(RangeError);
   });
 
   it('breaks ties toward the lower index', () => {
     const white = ROUND_TILE_PALETTE.colours.filter(({ id }) => id === 'white');
     const twins = { colours: [...white, ...white] };
-    expect(quantise(solid(16, 16, [255, 255, 255, 255]), size, twins, false).cells[0]).toBe(0);
+    expect(quantise(solid(16, 16, [255, 255, 255, 255]), size, twins, { dithering: false }).cells[0]).toBe(0);
   });
 
   it('rejects an image that does not match the stud grid', () => {
-    expect(() => quantise(solid(8, 8, [0, 0, 0, 255]), size, ROUND_TILE_PALETTE, false)).toThrow(RangeError);
+    expect(() => quantise(solid(8, 8, [0, 0, 0, 255]), size, ROUND_TILE_PALETTE, { dithering: false })).toThrow(RangeError);
   });
 });

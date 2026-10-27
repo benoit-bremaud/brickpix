@@ -1,4 +1,4 @@
-import type { MosaicSize, Rect } from './image';
+import type { MosaicSize, Rect } from './mosaic';
 
 /**
  * Largest rectangle of ratio platesWide:platesHigh centred in a width × height image (cover fit),

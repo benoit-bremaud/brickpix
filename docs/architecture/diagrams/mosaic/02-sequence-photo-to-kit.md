@@ -15,16 +15,17 @@ sequenceDiagram
     participant Domain as domain (pure TS)
 
     Maker->>UI: Import a photo (file / drop)
-    UI->>Canvas: decode(File) via createImageBitmap
+    UI->>Canvas: decode(File) via createImageBitmap (longest side ≤ 2048 px)
     Canvas-->>UI: source RgbaImage (Uint8ClampedArray, w, h)
 
     loop each size, retouch or dithering change (debounced)
         Maker->>UI: size N × M / crop / brightness / contrast / saturation / sharpen / background / dithering
         UI->>Domain: retouch(source, RetouchSettings, MosaicSize)
-        Domain-->>UI: retouched RgbaImage (crop ratio = N:M)
-        UI->>Domain: resample(retouched, MosaicSize)
+        Domain-->>UI: retouched RgbaImage and crop Rect (ratio N:M)
+        Note over UI,Domain: until #10, retouch is skipped and the crop is defaultCrop(w, h, MosaicSize)
+        UI->>Domain: resample(retouched, crop, MosaicSize)
         Domain-->>UI: studImage RgbaImage (16N × 16M)
-        UI->>Domain: quantise(studImage, MosaicSize, palette, dithering)
+        UI->>Domain: quantise(studImage, MosaicSize, palette, { dithering })
         Domain-->>UI: Mosaic (palette index per stud)
         UI->>Canvas: draw retouched photo and mosaic as round studs (Aperçu)
     end
@@ -49,6 +50,8 @@ sequenceDiagram
   typed arrays, so it is unit-testable without a DOM.
 - Retouch always restarts from the decoded source, never from the previous result, so adjustments
   do not accumulate rounding loss. The crop rectangle is clamped to the `N:M` ratio of the size.
+- Crop, resample and quantise are specified in
+  [quantise-mosaic.md](../../specs/quantise-mosaic.md).
 - Algorithms (V1 defaults, each a domain spec to detail before its code brick): colour distance
   CIEDE2000 in CIELAB; dithering Floyd–Steinberg; resampling by area average (box filter);
   sharpen by unsharp mask; background simplification by flattening low-detail regions toward

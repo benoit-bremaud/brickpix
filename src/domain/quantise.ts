@@ -1,5 +1,5 @@
 import { ciede2000, toLab, type Lab } from './colour';
-import { assertMosaicSize, studsOf, type Mosaic, type MosaicSize, type RgbaImage } from './image';
+import { assertMosaicSize, studsOf, type Mosaic, type MosaicSize, type RgbaImage } from './mosaic';
 import type { Palette, Rgb } from './palette';
 
 /** Floyd–Steinberg weights for the neighbours ahead (dx is mirrored on right-to-left rows). */
@@ -17,10 +17,17 @@ interface Candidate {
 }
 
 /** Palette colour nearest to `lab` by CIEDE2000; ties go to the lower index. */
-function nearest(lab: Lab, candidates: readonly Candidate[]): Candidate {
-  return candidates.reduce((best, candidate) =>
-    ciede2000(lab, candidate.lab) < ciede2000(lab, best.lab) ? candidate : best,
-  );
+function nearest(lab: Lab, first: Candidate, candidates: readonly Candidate[]): Candidate {
+  let best = first;
+  let bestDistance = Infinity;
+  for (const candidate of candidates) {
+    const distance = ciede2000(lab, candidate.lab);
+    if (distance < bestDistance) {
+      best = candidate;
+      bestDistance = distance;
+    }
+  }
+  return best;
 }
 
 /** Working buffer of RGB floats, so diffused error is not rounded away. */
@@ -45,10 +52,16 @@ function diffuse(rgb: Float32Array, image: RgbaImage, at: { x: number; y: number
   }
 }
 
+/** Quantisation options; dithering is off by default in the UI (spec quantise-mosaic.md). */
+export interface QuantiseOptions {
+  readonly dithering: boolean;
+}
+
 interface Work {
   readonly image: RgbaImage;
   readonly rgb: Float32Array;
   readonly cells: Uint8Array;
+  readonly first: Candidate;
   readonly candidates: readonly Candidate[];
   readonly dithering: boolean;
 }
@@ -61,7 +74,7 @@ function quantiseRow(work: Work, y: number): void {
     const x = dir === 1 ? step : width - 1 - step;
     const p = y * width + x;
     const [r = 0, g = 0, b = 0] = work.rgb.subarray(p * 3, p * 3 + 3);
-    const chosen = nearest(toLab(r, g, b), work.candidates);
+    const chosen = nearest(toLab(r, g, b), work.first, work.candidates);
     work.cells[p] = chosen.index;
     if (work.dithering) {
       diffuse(work.rgb, work.image, { x, y, dir }, [r - chosen.rgb[0], g - chosen.rgb[1], b - chosen.rgb[2]]);
@@ -72,20 +85,19 @@ function quantiseRow(work: Work, y: number): void {
 /**
  * Maps each stud of `studs` (16 × plates per side) to its nearest palette colour by CIEDE2000,
  * optionally with Floyd–Steinberg dithering (serpentine scan, error in sRGB 0–255).
+ * @throws RangeError if `size` is invalid, `studs` is not `studsOf(size)` or the palette is empty.
  */
-export function quantise(studs: RgbaImage, size: MosaicSize, palette: Palette, dithering: boolean): Mosaic {
+export function quantise(studs: RgbaImage, size: MosaicSize, palette: Palette, options: QuantiseOptions): Mosaic {
+  const { dithering } = options;
   assertMosaicSize(size);
   const grid = studsOf(size);
   if (studs.width !== grid.width || studs.height !== grid.height) {
     throw new RangeError(`Expected a ${grid.width} × ${grid.height} stud image, got ${studs.width} × ${studs.height}.`);
   }
-  const work: Work = {
-    image: studs,
-    rgb: rgbBuffer(studs),
-    cells: new Uint8Array(grid.width * grid.height),
-    candidates: palette.colours.map(({ rgb }, index) => ({ index, rgb, lab: toLab(...rgb) })),
-    dithering,
-  };
+  const candidates = palette.colours.map(({ rgb }, index) => ({ index, rgb, lab: toLab(...rgb) }));
+  const [first] = candidates;
+  if (first === undefined) throw new RangeError('The palette has no colour.');
+  const work: Work = { image: studs, rgb: rgbBuffer(studs), cells: new Uint8Array(grid.width * grid.height), first, candidates, dithering };
   for (let y = 0; y < grid.height; y++) quantiseRow(work, y);
   return { size, palette, cells: work.cells };
 }

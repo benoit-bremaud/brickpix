@@ -18,9 +18,12 @@ flowchart TB
 
     subgraph domain["src/domain (pure TypeScript)"]
         Retouch["retouch"]
+        Crop["crop<br/>(default centred crop, until retouch)"]
         Resample["resample"]
         Palette["palette<br/>(1 × 1 round tile colours)"]
-        Quantise["quantise<br/>(perceptual distance, dithering)"]
+        Quantise["quantise<br/>(nearest colour, dithering)"]
+        Colour["colour<br/>(CIELAB, CIEDE2000)"]
+        Mosaic["mosaic<br/>(RgbaImage, MosaicSize, Mosaic types)"]
         Plan["buildPlan"]
         Bom["billOfMaterials"]
         BrickLink["brickLinkXml"]
@@ -30,12 +33,14 @@ flowchart TB
     Editor --> Render
     Editor --> Download
     Editor --> Retouch
+    Editor --> Crop
     Editor --> Resample
     Editor --> Quantise
     Editor --> Plan
     Editor --> Bom
     Editor --> BrickLink
     Quantise --> Palette
+    Quantise --> Colour
     Bom --> Palette
     BrickLink --> Bom
     Plan --> Palette
@@ -43,6 +48,8 @@ flowchart TB
 
 ## Notes
 
+- `mosaic` holds the shared domain types and size rules; every domain module may import it (arrows
+  omitted for legibility). `crop` folds into `retouch` in #10.
 - No network egress: there is no API client component. The only output leaving the page is a file
   the user downloads.
 - The purity of `src/domain` is enforced by `tsconfig.domain.json` (no DOM lib) and the ESLint

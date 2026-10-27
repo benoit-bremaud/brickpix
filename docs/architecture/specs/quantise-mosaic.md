@@ -18,6 +18,13 @@ Status: validated by the owner on 2026-10-27 (issue #8). Implements `resample` a
   (cover fit). Integer pixel bounds, at least 1 × 1.
 - #10 replaces it by the user's crop rectangle, clamped to the same ratio.
 
+## Decode (web)
+
+- The photo is decoded in the browser and downscaled so its longest side is at most 2048 px
+  (`MAX_DECODE_SIDE`), well above the 128 studs of the largest side. It bounds memory on large
+  photos (a 100-megapixel file would otherwise need about 400 MB) and stays under browser canvas
+  limits.
+
 ## Resample
 
 - Input: the photo and the crop rectangle. Output: an `RgbaImage` of `16N × 16M` studs.
