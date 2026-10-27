@@ -95,7 +95,9 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   about 600 ms, feedback in under 5 ms. Owner MCDA: busy state + lazy paint 400/500 (#28 stays
   open for the phone budget), bill scroll region with `tabIndex={0}` + justified NOSONAR S6845
   445/500 (WebKit does not focus scroll regions). Two local reviews and a full QA pass
-  (`docs/architecture/qa/2026-10-27-kit-full.md`), all Must and Should fixed. Codex: 3 P2
+  (`docs/architecture/qa/2026-10-27-kit-full.md`). Every Must and Should of the local reviews is
+  fixed; two QA Shoulds stay open: security headers (#24) and a pending dev-dependency update.
+  Codex: 3 P2
   findings (stale inputs, table reflow at 200 % text, pending preview), all fixed and answered
   inline. Review threads must be resolved before the merge (branch rule). Gate: 100 tests, 100 %
   of lines and 94 % of branches, docs 100 %, SonarQube passed, Gitleaks clean.
