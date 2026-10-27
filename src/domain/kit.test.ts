@@ -70,6 +70,10 @@ describe('billOfMaterials', () => {
     expect(billOfMaterials(mosaic, 2).tiles.map((line) => line.spares)).toEqual([11, 11, 1]);
     expect(billOfMaterials(mosaic, 5).tiles.map((line) => line.spares)).toEqual([26, 26, 1]);
   });
+
+  it('exports one black base plate per plate of a multi-plate mosaic', () => {
+    expect(toBrickLinkXml(billOfMaterials(mosaic, 0))).toContain('<ITEMID>91405</ITEMID><COLOR>11</COLOR><MINQTY>4</MINQTY>');
+  });
 });
 
 describe('toBrickLinkXml', () => {
@@ -92,6 +96,8 @@ describe('relativeLuminance', () => {
   it('is 0 for black, 1 for white and follows the WCAG weights', () => {
     expect(relativeLuminance(0, 0, 0)).toBe(0);
     expect(relativeLuminance(255, 255, 255)).toBeCloseTo(1, 10);
+    expect(relativeLuminance(255, 0, 0)).toBeCloseTo(0.2126, 10);
     expect(relativeLuminance(0, 255, 0)).toBeCloseTo(0.7152, 10);
+    expect(relativeLuminance(0, 0, 255)).toBeCloseTo(0.0722, 10);
   });
 });

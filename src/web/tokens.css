@@ -239,6 +239,11 @@ main {
     content-visibility: visible;
   }
 
+  /* Paper does not scroll: print every column of the bill. */
+  .bill-scroll {
+    overflow: visible;
+  }
+
   .stud {
     font-size: var(--stud-font-print);
   }

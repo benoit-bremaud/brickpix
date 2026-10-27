@@ -36,6 +36,7 @@ function useFakeBrowser() {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    vi.useRealTimers();
     writeText.mockReset();
   });
 }
@@ -97,6 +98,7 @@ describe("Kit plan", () => {
     expect(firstStud).toHaveTextContent("5");
     expect(firstStud).toHaveAttribute("data-ink", "light");
     expect(left.querySelectorAll(".stud")).toHaveLength(256);
+    expect(right.querySelector(".stud")).toHaveTextContent("11");
     expect(within(left).getAllByRole("listitem").map((item) => item.textContent?.trim())).toEqual(["1 — White", "5 — Red"]);
     expect(within(right).getAllByRole("listitem").map((item) => item.textContent?.trim())).toEqual(["11 — Blue"]);
   });
@@ -125,6 +127,15 @@ describe("Kit export", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Copie impossible, utilisez Télécharger.");
   });
 
+  it("tells the buyer to download when the browser has no clipboard", async () => {
+    vi.stubGlobal("navigator", {});
+    render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
+
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Copier la liste BrickLink" })));
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Copie impossible, utilisez Télécharger.");
+  });
+
   it("downloads the XML through a revoked local Blob URL under the plates file name", async () => {
     vi.useFakeTimers();
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockReturnValue(undefined);
@@ -141,7 +152,6 @@ describe("Kit export", () => {
     expect(URL.revokeObjectURL).not.toHaveBeenCalled();
     vi.runAllTimers();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:local");
-    vi.useRealTimers();
   });
 
 });
