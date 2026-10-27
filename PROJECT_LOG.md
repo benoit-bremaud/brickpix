@@ -134,3 +134,16 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
     SonarQube passed, Gitleaks clean. QA reports: `docs/architecture/qa/2026-10-27-retouch.md`
     (full pass) and `…-retouch-smoke.md`.
   - Follow-ups: #35, #36, #37 (remove the LEGO trademark), #38.
+
+## 2026-10-28 — Trademark removal
+
+- **PR #41 merged** (`0220325`): chore(brand), remove the trademark from the product and docs,
+  closes #37. Owner decisions, one MCDA per point:
+  - wording: «mosaïque de briques» in the UI, «1×1 round tiles» in detailed docs (430/500);
+  - compatibility references: manufacturer element and colour ids stay in the palette spec as
+    provenance; the README non-affiliation notice is the only remaining mention (460/500);
+  - `legoElementId` removed from `PaletteColour` and the class diagram, as nothing used it; the
+    spec-row test still checks the element-id column (470/500);
+  - history: earlier log entries and dated QA notes stay as written (430/500).
+  - Gate: 156 tests, 98.9 % of statements covered, SonarQube passed, Gitleaks clean, QA smoke on
+    the tagline. Codex found no issue.
