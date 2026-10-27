@@ -61,6 +61,8 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 - Plan: per plate, a caption «Plaque N (colonne c, rangée r)», a 16 × 16 HTML/CSS grid of round
   cells in the stud colour with the legend number, and the plate legend.
 - Number ink: black or white, whichever has the higher WCAG contrast ratio with the stud colour.
+  The domain gives `relativeLuminance(rgb)` (in `colour.ts`, reusing the sRGB linearisation); the
+  web picks the ink and maps it to the ink tokens.
   On the 17 colours the lowest ratio is 5.2:1 (Dark Bluish Gray, white ink), above AA 4.5:1.
 - «Imprimer le plan» calls `window.print()`; a `@media print` style hides the controls, prints the
   bill of materials on the first page, then one plate per page (A4: about 11 mm per cell).
@@ -91,6 +93,7 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 | Number ink | black or white by WCAG contrast | 450 vs fixed per colour 410, white + outline 340 |
 | Labels | explicit | 480 vs titled block 445, short + aria-label 340, short 325 |
 | Spare control | native radios in a fieldset | 480 vs segmented 470, select 430, slider 255 |
+| Ink computation | luminance in the domain, ink choice in the web | 480 vs `contrastInk` in the domain 465, in the palette 390, all in the web 375 |
 | Spare option text | «Aucune», «2 % (conseillé)», «5 %» | 460 vs + help line 455, bare percents 375 |
 
 Follow-ups outside this brick: #20 (compare sizes), #21 (RAL), #22 (API or library), #23
