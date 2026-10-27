@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { toBrickLinkXml } from "../../domain/brickLinkXml";
 import { billOfMaterials, buildPlan, DEFAULT_SPARE_PERCENT, type SparePercent } from "../../domain/kit";
@@ -19,9 +19,11 @@ type Props = { readonly mosaic: Mosaic; readonly onBack: () => void };
 export function Kit({ mosaic, onBack }: Props) {
   const [spares, setSpares] = useState<SparePercent>(DEFAULT_SPARE_PERCENT);
   const bom = billOfMaterials(mosaic, spares);
+  const title = useRef<HTMLHeadingElement>(null);
+  useEffect(() => title.current?.focus(), []); // the order button is now hidden (WCAG 2.4.3)
   return (
     <section className="kit" aria-labelledby="kit-title">
-      <h2 id="kit-title">Votre kit</h2>
+      <h2 id="kit-title" ref={title} tabIndex={-1}>Votre kit</h2>
       <KitActions xml={toBrickLinkXml(bom)} fileName={xmlFileName(mosaic)} onBack={onBack} />
       <SpareChoice value={spares} onChange={setSpares} />
       <BillTable bom={bom} palette={mosaic.palette} />

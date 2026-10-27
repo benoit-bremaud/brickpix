@@ -6,6 +6,7 @@
   --colour-accent: #c91a09;
   --colour-error: #9b1c0f;
   --colour-baseplate: #2b2a27;
+  /* Must stay pure black and white: ink.ts compares against luminance 0 and 1. */
   --colour-ink-dark: #000;
   --colour-ink-light: #fff;
   --space-1: 0.25rem;
@@ -18,6 +19,8 @@
   --swatch-size: 1rem;
   --stud-font: 0.6rem;
   --stud-font-print: 9pt;
+  --studs-per-plate: 16;
+  --stud-gap: 1px;
 }
 
 body {
@@ -66,6 +69,11 @@ main {
 .controls input[type="number"] {
   width: 4rem;
   padding: var(--space-1) var(--space-2);
+}
+
+/* The hidden attribute wins over component display rules (e.g. .controls is a flex box). */
+[hidden] {
+  display: none !important;
 }
 
 /* Hidden from sight but still focusable and announced, unlike the hidden attribute. */
@@ -163,8 +171,8 @@ main {
 
 .plate-grid {
   display: grid;
-  grid-template-columns: repeat(16, 1fr);
-  gap: 1px;
+  grid-template-columns: repeat(var(--studs-per-plate), 1fr);
+  gap: var(--stud-gap);
   padding: var(--space-1);
   background: var(--colour-baseplate);
   border-radius: var(--radius);
@@ -214,7 +222,9 @@ main {
     font-size: var(--stud-font-print);
   }
 
-  * {
+  .stud,
+  .swatch,
+  .plate-grid {
     print-color-adjust: exact;
   }
 }

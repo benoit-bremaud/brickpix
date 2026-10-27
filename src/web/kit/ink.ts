@@ -1,6 +1,7 @@
 import { relativeLuminance } from "../../domain/colour";
 import type { Rgb } from "../../domain/palette";
 
+/** Colour of the number on a stud: `dark` (black) on light studs, `light` (white) on dark ones. */
 export type Ink = "dark" | "light";
 
 /** WCAG contrast ratio between two relative luminances. */

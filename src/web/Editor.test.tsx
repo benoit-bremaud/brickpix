@@ -202,11 +202,13 @@ describe("Editor kit", () => {
     expect(screen.queryByRole("spinbutton", { name: "Largeur (plaques)" })).toBeNull();
   });
 
-  it("returns to editing on «Retour à l'édition»", async () => {
+  it("returns to editing on «Retour à l'édition», focus back on the order button", async () => {
     await orderKit();
     fireEvent.click(screen.getByRole("button", { name: "Retour à l'édition" }));
+    act(() => vi.runAllTimers());
     expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
     expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Commander mon kit" })).toHaveFocus();
   });
 
   it("returns to editing when a new photo is imported, keeping the size", async () => {
@@ -214,6 +216,26 @@ describe("Editor kit", () => {
     await importPhoto();
     expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
     expect(screen.getByLabelText("Largeur (plaques)")).toHaveValue(2);
+  });
+});
+
+describe("Editor kit dithering", () => {
+  useFakeBrowser();
+
+  it("forwards the dithering choice: a mid-grey photo needs more colours dithered", async () => {
+    const grey = { width: 64, height: 48, data: new Uint8ClampedArray(64 * 48 * 4).fill(140) };
+    const coloursOrdered = async (dithering: boolean) => {
+      stubCanvas().getImageData.mockReturnValue(grey);
+      const view = render(<App />);
+      await importPhoto();
+      if (dithering) fireEvent.click(screen.getByLabelText("Tramage"));
+      fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+      const rows = screen.getByRole("table").querySelectorAll("tbody tr").length;
+      view.unmount();
+      return rows;
+    };
+    const plain = await coloursOrdered(false);
+    expect(await coloursOrdered(true)).toBeGreaterThan(plain);
   });
 });
 

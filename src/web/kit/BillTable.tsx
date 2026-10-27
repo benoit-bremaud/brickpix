@@ -1,4 +1,4 @@
-import type { BillOfMaterials } from "../../domain/kit";
+import { legendNumber, tilesToBuy, type BillOfMaterials } from "../../domain/kit";
 import type { Palette } from "../../domain/palette";
 import { Swatch } from "./Swatch";
 
@@ -7,7 +7,7 @@ type Props = { readonly bom: BillOfMaterials; readonly palette: Palette };
 /** Bill of materials: legend number, colour, tiles to place and to buy, then totals and plates. */
 export function BillTable({ bom, palette }: Props) {
   const placed = bom.tiles.reduce((sum, line) => sum + line.quantity, 0);
-  const bought = bom.tiles.reduce((sum, line) => sum + line.quantity + line.spares, 0);
+  const bought = bom.tiles.reduce((sum, line) => sum + tilesToBuy(line), 0);
   return (
     <table className="bill">
       <caption>Liste des pièces</caption>
@@ -17,10 +17,10 @@ export function BillTable({ bom, palette }: Props) {
       <tbody>
         {bom.tiles.map((line) => (
           <tr key={line.colour.id}>
-            <td>{palette.colours.indexOf(line.colour) + 1}</td>
+            <td>{legendNumber(palette.colours.indexOf(line.colour))}</td>
             <td><Swatch colour={line.colour} /> {line.colour.name}</td>
             <td>{line.quantity}</td>
-            <td>{line.quantity + line.spares}</td>
+            <td>{tilesToBuy(line)}</td>
           </tr>
         ))}
       </tbody>

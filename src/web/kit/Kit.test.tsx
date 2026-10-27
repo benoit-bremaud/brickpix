@@ -13,10 +13,15 @@ function makeMosaic(): Mosaic {
   return { size: { platesWide: 2, platesHigh: 1 }, palette: ROUND_TILE_PALETTE, cells };
 }
 
+function totalsOf(header: string) {
+  const row = screen.getByRole("rowheader", { name: header }).closest("tr");
+  return row === null ? undefined : within(row).getAllByRole("cell").map((cell) => cell.textContent);
+}
+
 function rowOf(name: string) {
   const row = screen.getByRole("cell", { name: new RegExp(name) }).closest("tr");
   if (row === null) throw new Error(`no row ${name}`);
-  return within(row).getAllByRole("cell").map((cell) => cell.textContent);
+  return within(row).getAllByRole("cell").map((cell) => cell.textContent?.trim());
 }
 
 const writeText = vi.fn();
@@ -40,18 +45,36 @@ describe("Kit bill of materials", () => {
     render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
 
     expect(screen.getByRole("radio", { name: "2 % (conseillé)" })).toBeChecked();
-    expect(rowOf("White")).toEqual(["1", " White", "255", "261"]);
-    expect(rowOf("Red")).toEqual(["5", " Red", "1", "2"]);
-    expect(rowOf("Blue")).toEqual(["11", " Blue", "256", "262"]);
-    expect(screen.getByRole("rowheader", { name: "Plaques de base 16 × 16" }).closest("tr")).toHaveTextContent("22");
+    expect(rowOf("White")).toEqual(["1", "White", "255", "261"]);
+    expect(rowOf("Red")).toEqual(["5", "Red", "1", "2"]);
+    expect(rowOf("Blue")).toEqual(["11", "Blue", "256", "262"]);
+    expect(totalsOf("Tuiles rondes 1 × 1")).toEqual(["512", "525"]);
+    expect(totalsOf("Plaques de base 16 × 16")).toEqual(["2", "2"]);
   });
 
-  it("updates the quantities to buy when the spare rate changes", () => {
+  it("focuses its heading when it opens", () => {
     render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
 
-    fireEvent.click(screen.getByRole("radio", { name: "Aucune" }));
+    expect(screen.getByRole("heading", { name: "Votre kit" })).toHaveFocus();
+  });
+});
 
-    expect(rowOf("White")).toEqual(["1", " White", "255", "255"]);
+describe("Kit spare rate", () => {
+  useFakeBrowser();
+
+  it.each([
+    ["Aucune", "255", "512"],
+    ["5 %", "268", "539"],
+  ])("updates the table and the copied XML for «%s»", async (option, whiteToBuy, total) => {
+    writeText.mockResolvedValue(undefined);
+    render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: option }));
+    await act(async () => fireEvent.click(screen.getByRole("button", { name: "Copier la liste BrickLink" })));
+
+    expect(rowOf("White")).toEqual(["1", "White", "255", whiteToBuy]);
+    expect(totalsOf("Tuiles rondes 1 × 1")?.[1]).toBe(total);
+    expect(writeText.mock.lastCall?.[0]).toContain(`<COLOR>1</COLOR><MINQTY>${whiteToBuy}</MINQTY>`);
   });
 
 });
@@ -66,8 +89,8 @@ describe("Kit plan", () => {
     expect(firstStud).toHaveTextContent("5");
     expect(firstStud).toHaveAttribute("data-ink", "light");
     expect(left.querySelectorAll(".stud")).toHaveLength(256);
-    expect(within(left).getAllByRole("listitem").map((item) => item.textContent)).toEqual([" 1 — White", " 5 — Red"]);
-    expect(within(right).getAllByRole("listitem").map((item) => item.textContent)).toEqual([" 11 — Blue"]);
+    expect(within(left).getAllByRole("listitem").map((item) => item.textContent?.trim())).toEqual(["1 — White", "5 — Red"]);
+    expect(within(right).getAllByRole("listitem").map((item) => item.textContent?.trim())).toEqual(["11 — Blue"]);
   });
 
 });
@@ -94,7 +117,8 @@ describe("Kit export", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Copie impossible, utilisez Télécharger.");
   });
 
-  it("downloads the XML through a revoked local Blob URL under the plates file name", () => {
+  it("downloads the XML through a revoked local Blob URL under the plates file name", async () => {
+    vi.useFakeTimers();
     const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockReturnValue(undefined);
     render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
 
@@ -103,7 +127,13 @@ describe("Kit export", () => {
     const link = click.mock.contexts[0] as HTMLAnchorElement;
     expect(link.download).toBe("brickpix-2x1-plaques-bricklink.xml");
     expect(link.href).toBe("blob:local");
+    const blob = vi.mocked(URL.createObjectURL).mock.lastCall?.[0] as Blob;
+    expect(blob.type).toBe("application/xml");
+    expect(await blob.text()).toMatch(/^<INVENTORY>\n.*<\/INVENTORY>\n$/s);
+    expect(URL.revokeObjectURL).not.toHaveBeenCalled();
+    vi.runAllTimers();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:local");
+    vi.useRealTimers();
   });
 
 });

@@ -71,10 +71,16 @@ function useImport() {
  */
 function useKit(source: RgbaImage | undefined) {
   const [kit, setKit] = useState<{ readonly source: RgbaImage; readonly mosaic: Mosaic }>();
+  const orderButton = useRef<HTMLButtonElement>(null);
   const order = (current: RgbaImage, size: MosaicSize, dithering: boolean) =>
     setKit({ source: current, mosaic: computeMosaic(current, size, { dithering }) });
+  const back = () => {
+    setKit(undefined);
+    // The button is hidden until the re-render; focus it once it is shown again (WCAG 2.4.3).
+    setTimeout(() => orderButton.current?.focus(), 0);
+  };
   const shown = kit !== undefined && kit.source === source ? kit.mosaic : undefined;
-  return { kit: shown, order, back: () => setKit(undefined) };
+  return { kit: shown, order, back, orderButton };
 }
 
 /** Import, size, live preview («Aperçu») and the «Commander mon kit» screen. */
@@ -82,7 +88,7 @@ export function Editor() {
   const { source, error, importFile } = useImport();
   const [size, setSize] = useState<MosaicSize>(DEFAULT_SIZE);
   const [dithering, setDithering] = useState(false);
-  const { kit, order, back } = useKit(source);
+  const { kit, order, back, orderButton } = useKit(source);
   const [over, setOver] = useState(false);
   const canvas = usePreview(source, size, dithering);
   const onDrop = (event: DragEvent) => {
@@ -100,6 +106,7 @@ export function Editor() {
         <input type="file" accept="image/*" className="visually-hidden" onChange={(event) => void importFile(event.target.files?.[0])} />
       </label>
       {error !== undefined && <p role="alert" className="error">{error}</p>}
+      {/* Hidden, not unmounted, while the kit shows: the preview canvas keeps its drawing. */}
       <div className="controls" hidden={kit !== undefined}>
         <label>Largeur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesWide} onChange={setPlates("platesWide")} /></label>
         <label>Hauteur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesHigh} onChange={setPlates("platesHigh")} /></label>
@@ -109,7 +116,7 @@ export function Editor() {
         <figure className="preview-figure" aria-labelledby="preview-caption" hidden={kit !== undefined}>
           <figcaption id="preview-caption">Aperçu</figcaption>
           <canvas ref={canvas} className="preview">Aperçu de la mosaïque en tuiles rondes.</canvas>
-          <button type="button" className="order" onClick={() => order(source, size, dithering)}>Commander mon kit</button>
+          <button ref={orderButton} type="button" className="order" onClick={() => order(source, size, dithering)}>Commander mon kit</button>
         </figure>
       )}
       {kit !== undefined && <Kit mosaic={kit} onBack={back} />}

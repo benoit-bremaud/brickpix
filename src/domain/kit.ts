@@ -20,6 +20,7 @@ export interface TileLine {
   readonly spares: number;
 }
 
+/** Tiles per used colour, in palette order, and the 16 × 16 base plates (`platesWide × platesHigh`). */
 export interface BillOfMaterials {
   readonly tiles: readonly TileLine[];
   readonly basePlates: number;
@@ -27,8 +28,16 @@ export interface BillOfMaterials {
 
 /** Spare rates the buyer can choose, in percent. */
 export const SPARE_PERCENTS = [0, 2, 5] as const;
+/** A spare rate in whole percent, so `ceil(quantity × percent / 100)` has no float rounding. */
 export type SparePercent = (typeof SPARE_PERCENTS)[number];
+/** The kit screen's default, «2 % (conseillé)» (spec kit.md). */
 export const DEFAULT_SPARE_PERCENT: SparePercent = 2;
+
+/** Tiles to buy for one colour: to place plus spares. */
+export const tilesToBuy = (line: TileLine): number => line.quantity + line.spares;
+
+/** Legend number of a palette index: index + 1, the same on every plate and in the bill. */
+export const legendNumber = (paletteIndex: number): number => paletteIndex + 1;
 
 function plateCells(mosaic: Mosaic, column: number, row: number): Uint8Array {
   const width = studsOf(mosaic.size).width;
@@ -57,7 +66,10 @@ export function buildPlan(mosaic: Mosaic): PlatePlan[] {
   return plates;
 }
 
-/** Tiles per used colour in palette order, with `ceil(quantity × sparePercent / 100)` spares. */
+/**
+ * Tiles per used colour in palette order (unused colours are left out), with
+ * `ceil(quantity × sparePercent / 100)` spares: at least one per colour when the rate is above 0.
+ */
 export function billOfMaterials(mosaic: Mosaic, sparePercent: SparePercent): BillOfMaterials {
   const counts = new Uint32Array(mosaic.palette.colours.length);
   for (const index of mosaic.cells) counts[index] = (counts[index] ?? 0) + 1;

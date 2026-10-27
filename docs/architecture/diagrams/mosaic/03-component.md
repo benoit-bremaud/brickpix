@@ -23,7 +23,7 @@ flowchart TB
         Resample["resample"]
         Palette["palette<br/>(1 × 1 round tile colours)"]
         Quantise["quantise<br/>(nearest colour, dithering)"]
-        Colour["colour<br/>(CIELAB, CIEDE2000)"]
+        Colour["colour<br/>(CIELAB, CIEDE2000, relative luminance)"]
         Mosaic["mosaic<br/>(RgbaImage, MosaicSize, Mosaic types)"]
         Plan["buildPlan"]
         Bom["billOfMaterials"]
@@ -41,6 +41,7 @@ flowchart TB
     Kit --> Plan
     Kit --> Bom
     Kit --> BrickLink
+    Kit --> Colour
     Quantise --> Palette
     Quantise --> Colour
     Bom --> Palette

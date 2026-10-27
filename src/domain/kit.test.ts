@@ -37,6 +37,16 @@ describe('buildPlan', () => {
     });
   });
 
+  it('keeps x and y in place inside each plate', () => {
+    const valueAt = (x: number, y: number) => (x * 3 + y) % 17;
+    const plates = buildPlan(mosaicOf({ platesWide: 2, platesHigh: 2 }, valueAt));
+    plates.forEach((plate) => {
+      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+        expect(plate.cells[y * 16 + x]).toBe(valueAt(plate.column * 16 + x, plate.row * 16 + y));
+      }
+    });
+  });
+
   it('lists the colours of each plate once, in palette order', () => {
     const mosaic = mosaicOf({ platesWide: 2, platesHigh: 1 }, (x, y) => (x < 16 ? [7, 3, 7, 0][y % 4] ?? 0 : 16));
     const legends = buildPlan(mosaic).map((plate) => plate.legend.map((colour) => colour.id));

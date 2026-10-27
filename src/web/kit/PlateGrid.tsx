@@ -1,4 +1,4 @@
-import type { PlatePlan } from "../../domain/kit";
+import { legendNumber, type PlatePlan } from "../../domain/kit";
 import type { Palette } from "../../domain/palette";
 import { inkOn } from "./ink";
 import { cssColour, Swatch } from "./Swatch";
@@ -15,13 +15,13 @@ export function PlateGrid({ plate, number, palette }: Props) {
       <div className="plate-grid">
         {Array.from(plate.cells, (index, cell) => (
           <span key={cell} className="stud" data-ink={studs[index]?.ink} style={{ background: studs[index]?.background }}>
-            {index + 1}
+            {legendNumber(index)}
           </span>
         ))}
       </div>
       <ul className="legend">
         {plate.legend.map((colour) => (
-          <li key={colour.id}><Swatch colour={colour} /> {palette.colours.indexOf(colour) + 1} — {colour.name}</li>
+          <li key={colour.id}><Swatch colour={colour} /> {legendNumber(palette.colours.indexOf(colour))} — {colour.name}</li>
         ))}
       </ul>
     </figure>
