@@ -60,6 +60,7 @@ classDiagram
     class TileLine {
         +colour: PaletteColour
         +quantity: number
+        +spares: number
     }
 
     RetouchSettings *-- Rect
@@ -67,7 +68,7 @@ classDiagram
     Mosaic *-- MosaicSize
     Mosaic --> Palette
     Mosaic ..> PlatePlan : buildPlan()
-    Mosaic ..> BillOfMaterials : billOfMaterials()
+    Mosaic ..> BillOfMaterials : billOfMaterials(sparePercent)
     BillOfMaterials *-- "1..*" TileLine
     TileLine --> PaletteColour
     PlatePlan --> "1..*" PaletteColour : legend
@@ -81,7 +82,8 @@ classDiagram
 - `PlatePlan.cells` is the 16 × 16 slice of one plate; plates are numbered row-major from the top
   left, which is the build order. `legend` lists the colours used on that plate, in palette order;
   the plan grid prints each stud's legend number.
-- `BillOfMaterials.basePlates = platesWide × platesHigh`; tile quantities are exact counts (spares
-  are the buyer's choice, not added silently).
+- `BillOfMaterials.basePlates = platesWide × platesHigh`; `quantity` is the exact count of tiles to
+  place; `spares = ceil(quantity × sparePercent / 100)` with `sparePercent` in 0, 2, 5: visible and
+  adjustable by the buyer, 2 % by default ([kit.md](../../specs/kit.md)).
 - The palette is a static data table in the domain; exact colour values live in
   [the palette spec](../../specs/palette-round-tiles.md), not this diagram.

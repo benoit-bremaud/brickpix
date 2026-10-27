@@ -25,6 +25,7 @@ flowchart LR
     PlanOut -- "PII: likeness, user-directed print" --> Print[/"Printer / OS print dialog"/]
     Mosaic --> Bom["Bill of materials"] --> BomOut[/"Counts per colour, base plates"/]
     Bom --> Xml["BrickLink XML"] --> Dl[/"Downloaded file (user's disk)"/]
+    Xml --> Clip[/"Clipboard (user pastes into BrickLink)"/]
 
     subgraph Browser["Browser — trust boundary"]
         File
@@ -54,5 +55,5 @@ flowchart LR
 - Printing the plan is the one user-directed egress of photo-derived data (the plan pictures the
   mosaic): it goes to the OS print dialog, outside the browser boundary, only on the user's action.
 - The BrickLink XML holds only part ids, colour ids and quantities; it leaves the browser only as
-  a file the user chooses to download.
+  a file the user chooses to download or text the user copies to the clipboard.
 - The mosaic itself is a low-resolution rendition of the photo; it is treated as sensitive too.

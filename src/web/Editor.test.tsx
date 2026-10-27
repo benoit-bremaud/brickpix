@@ -92,6 +92,22 @@ describe("Editor debounce", () => {
   });
 });
 
+describe("Editor debounce and kit", () => {
+  useFakeBrowser();
+
+  it("drops a pending preview when the kit is ordered", async () => {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    const draw = vi.spyOn(renderModule, "renderMosaic");
+    fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "4" } });
+    fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+    act(() => vi.runAllTimers());
+    expect(screen.getByRole("heading", { name: "Votre kit" })).toBeInTheDocument();
+    expect(draw).not.toHaveBeenCalled();
+  });
+});
+
 describe("Editor controls", () => {
   useFakeBrowser();
 
@@ -180,6 +196,94 @@ describe("Editor import order", () => {
     render(<App />);
     await importPhoto();
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+});
+
+describe("Editor kit busy state", () => {
+  useFakeBrowser();
+
+  it("shows a busy message and disables the button until the kit is ready", async () => {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    const controls = screen.getByLabelText("Largeur (plaques)").closest(".controls");
+    const dropzone = screen.getByText(/Choisissez une photo/).closest("label");
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(controls).not.toHaveAttribute("inert");
+    expect(dropzone).not.toHaveAttribute("inert");
+
+    fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Préparation du kit…");
+    expect(screen.getByRole("button", { name: "Commander mon kit" })).toBeDisabled();
+    expect(controls).toHaveAttribute("inert");
+    expect(dropzone).toHaveAttribute("inert");
+
+    act(() => vi.advanceTimersToNextFrame()); // the message is painted, the computation still waits
+    expect(screen.getByRole("status")).toHaveTextContent("Préparation du kit…");
+    expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
+    act(() => vi.runOnlyPendingTimers()); // the setTimeout(0) runs the computation
+    expect(screen.getByRole("region", { name: "Votre kit" })).toBeInTheDocument();
+    expect(controls).not.toHaveAttribute("inert");
+  });
+});
+
+describe("Editor kit", () => {
+  useFakeBrowser();
+
+  async function orderKit() {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "2" } });
+    fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+    act(() => vi.runAllTimers());
+  }
+
+  it("recomputes the mosaic from the current inputs, before the debounced preview caught up", async () => {
+    await orderKit();
+    expect(screen.getByRole("region", { name: "Votre kit" })).toBeInTheDocument();
+    expect(screen.getAllByRole("figure", { name: /^Plaque/ })).toHaveLength(6);
+    expect(screen.queryByRole("figure", { name: "Aperçu" })).toBeNull();
+    expect(screen.queryByRole("spinbutton", { name: "Largeur (plaques)" })).toBeNull();
+  });
+
+  it("returns to editing on «Retour à l'édition», focus back on the order button", async () => {
+    await orderKit();
+    fireEvent.click(screen.getByRole("button", { name: "Retour à l'édition" }));
+    act(() => vi.runAllTimers());
+    expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
+    expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Commander mon kit" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Commander mon kit" })).toBeEnabled();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
+  it("returns to editing when a new photo is imported, keeping the size", async () => {
+    await orderKit();
+    await importPhoto();
+    expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
+    expect(screen.getByLabelText("Largeur (plaques)")).toHaveValue(2);
+  });
+});
+
+describe("Editor kit dithering", () => {
+  useFakeBrowser();
+
+  it("forwards the dithering choice: a mid-grey photo needs more colours dithered", async () => {
+    const grey = { width: 64, height: 48, data: new Uint8ClampedArray(64 * 48 * 4).fill(140) };
+    const coloursOrdered = async (dithering: boolean) => {
+      stubCanvas().getImageData.mockReturnValue(grey);
+      const view = render(<App />);
+      await importPhoto();
+      if (dithering) fireEvent.click(screen.getByLabelText("Tramage"));
+      fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+      act(() => vi.runAllTimers());
+      const rows = screen.getByRole("table").querySelectorAll("tbody tr").length;
+      view.unmount();
+      return rows;
+    };
+    const plain = await coloursOrdered(false);
+    expect(await coloursOrdered(true)).toBeGreaterThan(plain);
   });
 });
 
