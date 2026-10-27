@@ -12,7 +12,7 @@ export function BackgroundPanel({ settings, onSettings }: Props) {
   const set = (change: Partial<Background>) => onSettings({ ...settings, background: { ...background, ...change } });
   return (
     <div className="panel">
-      <label><input type="checkbox" role="switch" checked={background.enabled} onChange={(event) => set({ enabled: event.target.checked })} />Fond uni</label>
+      <label className="toggle"><input type="checkbox" role="switch" checked={background.enabled} onChange={(event) => set({ enabled: event.target.checked })} />Fond uni</label>
       {background.enabled && (
         <label className="slider">
           Tolérance

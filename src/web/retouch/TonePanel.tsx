@@ -39,7 +39,7 @@ export function TonePanel({ settings, dithering, onSettings, onAuto, onDithering
           <Slider label="Contraste" value={settings.contrast} min={-100} onChange={set("contrast")} />
           <Slider label="Saturation" value={settings.saturation} min={-100} onChange={set("saturation")} />
           <Slider label="Netteté" value={settings.sharpen} min={0} onChange={set("sharpen")} />
-          <label><input type="checkbox" checked={dithering} onChange={(event) => onDithering(event.target.checked)} />Tramage</label>
+          <label className="toggle"><input type="checkbox" checked={dithering} onChange={(event) => onDithering(event.target.checked)} />Tramage</label>
         </div>
       )}
     </div>

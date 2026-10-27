@@ -169,6 +169,12 @@ main {
   color: var(--colour-accent);
 }
 
+.controls label.toggle {
+  flex-direction: row;
+  align-items: center;
+  min-height: var(--touch-target);
+}
+
 .slider {
   display: flex;
   flex-direction: column;
