@@ -27,7 +27,7 @@ export default defineConfig({
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
       // Bootstrap and test wiring carry no logic; keep sonar.coverage.exclusions in sync.
-      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.d.ts", "src/web/main.tsx", "src/web/test-setup.ts"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/**/*.d.ts", "src/web/main.tsx", "src/web/test-setup.ts", "src/web/test-image.ts"],
       reporter: ["text", "lcov"],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
     },

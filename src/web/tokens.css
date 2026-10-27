@@ -1,0 +1,95 @@
+:root {
+  --colour-text: #1c1b19;
+  --colour-muted: #5f5b53;
+  --colour-surface: #f6f3ec;
+  --colour-border: #cfc8ba;
+  --colour-accent: #c91a09;
+  --colour-error: #9b1c0f;
+  --colour-baseplate: #2b2a27;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 1rem;
+  --space-4: 2rem;
+  --radius: 0.5rem;
+  --font-body: system-ui, sans-serif;
+  --preview-max: 40rem;
+}
+
+body {
+  margin: 0;
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  font-family: var(--font-body);
+}
+
+main {
+  max-width: var(--preview-max);
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+.dropzone {
+  position: relative;
+  display: block;
+  padding: var(--space-4) var(--space-3);
+  border: 2px dashed var(--colour-border);
+  border-radius: var(--radius);
+  text-align: center;
+  cursor: pointer;
+}
+
+.dropzone:focus-within,
+.dropzone[data-over="true"] {
+  border-color: var(--colour-accent);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: end;
+  margin: var(--space-3) 0;
+}
+
+.controls label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--colour-muted);
+}
+
+.controls input[type="number"] {
+  width: 4rem;
+  padding: var(--space-1) var(--space-2);
+}
+
+/* Hidden from sight but still focusable and announced, unlike the hidden attribute. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.error {
+  color: var(--colour-error);
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--colour-baseplate);
+  border-radius: var(--radius);
+}
+
+.preview-figure {
+  margin: 0;
+}
+
+.preview-figure figcaption {
+  margin-bottom: var(--space-2);
+  color: var(--colour-muted);
+}
