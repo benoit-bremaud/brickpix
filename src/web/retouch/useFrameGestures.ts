@@ -176,5 +176,7 @@ export function useFrameGestures(canvas: RefObject<HTMLCanvasElement | null>, ta
     onPointerLeave: up,
     onKeyDown: (event: KeyboardEvent<HTMLCanvasElement>) => keyDown(session.current, event),
     onKeyUp: (event: KeyboardEvent<HTMLCanvasElement>) => keyUp(session.current, event),
+    // Space released elsewhere never reaches keyUp: losing focus also ends «before».
+    onBlur: () => session.current.target?.onBefore(false),
   };
 }

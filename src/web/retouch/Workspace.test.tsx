@@ -210,6 +210,20 @@ describe("Before / after", () => {
     expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
   });
 
+});
+
+describe("Before / after release", () => {
+  useFakeBrowser();
+
+  it("leaves the photo when the canvas loses focus while Space is held", async () => {
+    const canvas = await start();
+    showMosaic();
+    fireEvent.keyDown(canvas, { key: " " });
+    const mosaic = vi.spyOn(renderModule, "renderMosaic");
+    fireEvent.blur(canvas);
+    expect(mosaic).toHaveBeenCalledTimes(1);
+  });
+
   it("does not stay on the photo when «Cadrer» opens during the press", async () => {
     const mosaic = vi.spyOn(renderModule, "renderMosaic");
     const canvas = await start();
