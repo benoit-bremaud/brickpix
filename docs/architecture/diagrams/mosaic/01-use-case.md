@@ -4,7 +4,7 @@
 
 Which goals does the user initiate, from a photo to a kit they can order and build? One actor: the
 person who makes the mosaic, usually as a gift. Everything runs in the browser; BrickLink and the
-LEGO store are not actors of the system, the user takes the exported list there themself.
+manufacturer's store are not actors of the system, the user takes the exported list there themself.
 
 ## Diagram
 
@@ -49,7 +49,7 @@ flowchart LR
 
 - **Import**: file picker or drag and drop. The photo never leaves the browser.
 - **Choose the mosaic size**: width and height are whole numbers ≥ 1 of 16 × 16 base plates (3 × 3
-  is the LEGO Art standard 48 × 48; 4 × 4, 6 × 4 and larger for giant mosaics). Default 3 × 3. The
+  is the common 48 × 48 size; 4 × 4, 6 × 4 and larger for giant mosaics). Default 3 × 3. The
   size sets the crop ratio, so changing it re-fits the crop.
 - **Retouch the photo**, optional and repeatable, is the differentiator against prior art. Its
   tools ([retouch.md](../../specs/retouch.md)): «Cadrer» (crop with the ratio locked to the size,

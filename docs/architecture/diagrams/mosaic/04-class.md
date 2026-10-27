@@ -44,7 +44,6 @@ classDiagram
         +name: string
         +rgb: [number, number, number]
         +brickLinkColorId: number
-        +legoElementId: string
     }
     class Palette {
         +colours: PaletteColour[]

@@ -1,6 +1,6 @@
 # brickpix
 
-Turn any photo into a LEGO Art mosaic. Import a picture, retouch it (crop, contrast, colours),
+Turn any photo into a brick mosaic. Import a picture, retouch it (crop, contrast, colours),
 preview it as a grid of 1×1 round tiles on 16×16 base plates, then order the kit: a build plan
 per plate and the list of parts to buy.
 
@@ -16,9 +16,9 @@ and [docs/architecture/README.md](docs/architecture/README.md).
 
 - Retouch before quantisation: crop, brightness, contrast, saturation, sharpen,
   background simplification.
-- Quantisation to the real palette of LEGO 1×1 round tiles, perceptual colour distance, optional
+- Quantisation to the real palette of 1×1 round tiles, perceptual colour distance, optional
   dithering, live preview.
-- Any mosaic size in multiples of 16×16 plates, from 16×16 (one plate; 48×48 is the LEGO Art standard) up to giant pieces.
+- Any mosaic size in multiples of 16×16 plates, from 16×16 (one plate; 48×48 is the common art-mosaic size) up to giant pieces.
 - "Aperçu" then "Commander mon kit": build plan per plate, bill of materials, BrickLink wanted list.
 
 ## Development

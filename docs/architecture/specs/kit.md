@@ -109,4 +109,4 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 | Spare option text | «Aucune», «2 % (conseillé)», «5 %» | 460 vs + help line 455, bare percents 375 |
 
 Follow-ups outside this brick: #20 (compare sizes), #21 (RAL), #22 (API or library), #23
-(LEGO-style building manual, including the surprise mode; MCDA 465 and 470).
+(step-by-step building manual, including the surprise mode; MCDA 465 and 470).

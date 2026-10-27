@@ -34,7 +34,7 @@ export interface Mosaic {
   readonly cells: Uint8Array;
 }
 
-/** The LEGO Art standard 48 × 48. */
+/** The common 48 × 48 art-mosaic size (3 × 3 plates). */
 export const DEFAULT_SIZE: MosaicSize = Object.freeze({ platesWide: 3, platesHigh: 3 });
 
 /** Throws a RangeError unless both sides are integers in 1..MAX_PLATES. */

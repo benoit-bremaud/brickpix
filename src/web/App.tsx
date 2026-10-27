@@ -6,7 +6,7 @@ export function App() {
   return (
     <main>
       <h1>brickpix</h1>
-      <p>Transformez une photo en mosaïque LEGO. Votre photo reste dans votre navigateur.</p>
+      <p>Transformez une photo en mosaïque de briques. Votre photo reste dans votre navigateur.</p>
       <Editor />
     </main>
   );
