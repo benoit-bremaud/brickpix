@@ -20,6 +20,7 @@
   --stud-font: 0.6rem;
   --stud-font-print: 9pt;
   --studs-per-plate: 16;
+  --plate-estimated-height: 40rem; /* placeholder size of an off-screen plate */
   --stud-gap: 1px;
 }
 
@@ -165,8 +166,17 @@ main {
   vertical-align: middle;
 }
 
+/* Stud and swatch colours are data: keep them in forced-colors mode (#29). */
+.stud,
+.swatch {
+  forced-color-adjust: none;
+}
+
 .plate {
   margin: var(--space-4) 0 0;
+  /* Only the plates on screen are laid out and painted (spec kit.md, #28); print renders them all. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto var(--plate-estimated-height);
 }
 
 .plate-grid {

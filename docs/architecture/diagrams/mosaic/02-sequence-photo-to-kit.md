@@ -31,7 +31,7 @@ sequenceDiagram
     end
 
     Maker->>UI: Commander mon kit
-    Note over UI,Domain: web computeMosaic runs the same crop, resample and quantise calls<br/>synchronously on the current photo, size and dithering
+    Note over UI,Domain: web computeMosaic runs the same crop, resample and quantise calls<br/>after painting «Préparation du kit…», on the current photo, size and dithering
     UI->>Domain: buildPlan(mosaic)
     Domain-->>UI: PlatePlan[] (row-major, 16 × 16 each, with legend)
     UI->>Domain: billOfMaterials(mosaic, sparePercent = 2)

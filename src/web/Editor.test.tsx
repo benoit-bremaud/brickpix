@@ -183,6 +183,22 @@ describe("Editor import order", () => {
   });
 });
 
+describe("Editor kit busy state", () => {
+  useFakeBrowser();
+
+  it("shows a busy message and disables the button until the kit is ready", async () => {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Préparation du kit…");
+    expect(screen.getByRole("button", { name: "Commander mon kit" })).toBeDisabled();
+    expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
+    act(() => vi.runAllTimers());
+    expect(screen.getByRole("region", { name: "Votre kit" })).toBeInTheDocument();
+  });
+});
+
 describe("Editor kit", () => {
   useFakeBrowser();
 
@@ -192,6 +208,7 @@ describe("Editor kit", () => {
     await importPhoto();
     fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "2" } });
     fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+    act(() => vi.runAllTimers());
   }
 
   it("recomputes the mosaic from the current inputs, before the debounced preview caught up", async () => {
@@ -230,6 +247,7 @@ describe("Editor kit dithering", () => {
       await importPhoto();
       if (dithering) fireEvent.click(screen.getByLabelText("Tramage"));
       fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+      act(() => vi.runAllTimers());
       const rows = screen.getByRole("table").querySelectorAll("tbody tr").length;
       view.unmount();
       return rows;

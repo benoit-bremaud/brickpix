@@ -50,8 +50,13 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 
 - Buttons: «Commander mon kit», «Retour à l'édition», «Imprimer le plan», «Copier la liste
   BrickLink», «Télécharger la liste BrickLink» (explicit labels, WCAG 2.4.6 and 2.5.3).
-- «Commander mon kit» recomputes the mosaic synchronously from the current photo, size and
-  dithering (it does not reuse the debounced preview), then shows the kit. «Retour à l'édition»
+- «Commander mon kit» first shows «Préparation du kit…» (a `role="status"` message, the button
+  disabled), lets the browser paint it, then recomputes the mosaic from the current photo, size
+  and dithering (it does not reuse the debounced preview) and shows the kit.
+- Each plate has `content-visibility: auto`, so only the plates on screen are laid out and
+  painted; print still renders every plate. Measured on the production build at 8 × 8: 375 → 148 ms
+  on a desktop CPU, 1250 → 550 ms with the CPU slowed 4× (phone profile). Budget: feedback under
+  100 ms, kit under 1 s on a phone (RAIL); going below 200 ms on a phone is #28. «Retour à l'édition»
   returns to `Editing` and discards it.
 - Bill of materials: a table with four columns «N°», «Couleur» (swatch and BrickLink name), «À
   poser», «À acheter»; the footer gives the tile totals and the base plates. Spares read as the
@@ -84,6 +89,7 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 | Spares default | 2 % | 415 vs 0 % 385, 5 % 385, forced choice 375 |
 | Plan rendering | HTML/CSS grid (vector print, testable, light on memory) | 445 vs SVG 405, canvas→PNG 375, canvas 2× 335 |
 | Kit trigger | synchronous recompute on click | 440 vs keyed memo 430, flush 375, disabled button 355 |
+| Kit speed (QA PERF-01, #28) | busy state + `content-visibility` on plates | 400 vs waiver 360, plates in batches 305 |
 | XML fields | minimal + `CONDITION N` | 460 vs minimal 430, + `REMARKS` 395 |
 | Export | copy and download | 440 vs textarea + download 435, download 400, copy 360 |
 | File name | `brickpix-{W}x{H}-plaques-bricklink.xml` | 465 vs studs 440, photo name 370, fixed 345 |
