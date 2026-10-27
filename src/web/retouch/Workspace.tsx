@@ -54,14 +54,15 @@ function ToolPanel({ tool, size, onSize, settings, onSettings, dithering, onDith
  * The retouch workspace of one photo: preview canvas, tool panels and the order button. The editor
  * remounts it for each new photo, which resets the retouch settings and opens «Cadrer» (05-state).
  */
-export function Workspace({ source, size, onSize, dithering, onDithering, hidden, preparing, onOrder, orderButton }: Props) {
+export function Workspace({ source, size, onSize, dithering, onDithering, hidden, preparing, onOrder, orderButton }: Readonly<Props>) {
   const [settings, setSettings] = useState<RetouchSettings>(NEUTRAL_RETOUCH);
   const [tool, setTool] = useState<Tool | undefined>("frame");
   const [before, setBefore] = useState(false);
   const [hinted, setHinted] = useState(false);
   const { quarterTurns, mirrored } = settings.framing;
   const oriented = useMemo(() => orient(source, quarterTurns, mirrored), [source, quarterTurns, mirrored]);
-  const view: View = tool === "frame" ? "frame" : before ? "before" : "mosaic";
+  let view: View = before ? "before" : "mosaic";
+  if (tool === "frame") view = "frame";
   const canvas = usePreview({ oriented, size, settings, dithering, view }, preparing || hidden);
   const gestures = useFrameGestures(canvas, {
     framing: view === "frame",

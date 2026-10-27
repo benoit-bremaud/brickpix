@@ -16,15 +16,16 @@ type Props = {
 };
 
 /** The retouch toolbar: a tap opens a tool's panel, a second tap closes it. */
-export function Toolbar({ tool, size, onTool }: Props) {
+export function Toolbar({ tool, size, onTool }: Readonly<Props>) {
   return (
-    <div className="toolbar" role="group" aria-label="Retouche">
+    <fieldset className="toolbar">
+      <legend className="visually-hidden">Retouche</legend>
       {TOOLS.map(({ id, label, icon }) => (
         <button key={id} type="button" aria-pressed={tool === id} onClick={() => onTool(tool === id ? undefined : id)}>
           <span aria-hidden="true">{icon}</span> {label}
           {id === "frame" && <small> {size.platesWide}×{size.platesHigh}</small>}
         </button>
       ))}
-    </div>
+    </fieldset>
   );
 }

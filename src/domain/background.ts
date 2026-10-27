@@ -41,8 +41,9 @@ function grow({ labs, width, tolerance, region }: Grid, seed: number, id: number
   const members = [seed];
   region[seed] = id;
   let [sumL, sumA, sumB] = labs[seed] ?? BLACK;
-  for (let head = 0; head < members.length; head++) {
-    for (const n of neighbours(members[head] ?? seed, width, labs.length)) {
+  // for-of also visits the members pushed during the loop: a breadth-first walk.
+  for (const member of members) {
+    for (const n of neighbours(member, width, labs.length)) {
       if (region[n] !== -1) continue;
       const lab = labs[n] ?? BLACK;
       const count = members.length;

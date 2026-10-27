@@ -7,7 +7,7 @@ export function clampPlates(value: string | number): number {
   return Number.isFinite(plates) ? Math.min(MAX_PLATES, Math.max(1, plates)) : 1;
 }
 
-function PlatesField({ label, value, onChange }: { label: string; value: number; onChange: (plates: number) => void }) {
+function PlatesField({ label, value, onChange }: Readonly<{ label: string; value: number; onChange: (plates: number) => void }>) {
   return (
     <div className="stepper">
       <button type="button" aria-label={`${label} −1`} disabled={value <= 1} onClick={() => onChange(clampPlates(value - 1))}>−</button>
@@ -25,7 +25,7 @@ type Props = {
 };
 
 /** «Cadrer»: size, zoom, quarter turn, mirror and recentre; drag and pinch happen on the canvas. */
-export function FramePanel({ size, framing, onSize, onFraming }: Props) {
+export function FramePanel({ size, framing, onSize, onFraming }: Readonly<Props>) {
   return (
     <div className="panel">
       <PlatesField label="Largeur (plaques)" value={size.platesWide} onChange={(platesWide) => onSize({ ...size, platesWide })} />

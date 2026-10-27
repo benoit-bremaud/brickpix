@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { MOODS, type RetouchSettings, type Tone } from "../../domain/retouch";
 
-function Slider({ label, value, min, onChange }: { label: string; value: number; min: number; onChange: (value: number) => void }) {
+function Slider({ label, value, min, onChange }: Readonly<{ label: string; value: number; min: number; onChange: (value: number) => void }>) {
   return (
     <label className="slider">
       {label}
@@ -23,7 +23,7 @@ type Props = {
 };
 
 /** «Ambiance»: Auto and the moods fill the sliders, which «Plus» reveals with the dithering toggle. */
-export function TonePanel({ settings, dithering, onSettings, onAuto, onDithering }: Props) {
+export function TonePanel({ settings, dithering, onSettings, onAuto, onDithering }: Readonly<Props>) {
   const [more, setMore] = useState(false);
   const set = (key: "brightness" | "contrast" | "saturation" | "sharpen") => (value: number) => onSettings({ ...settings, [key]: value });
   return (

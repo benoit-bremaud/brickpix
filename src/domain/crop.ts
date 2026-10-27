@@ -69,6 +69,6 @@ export function cropFor(width: number, height: number, size: MosaicSize, framing
 
 /** Plates on one axis after the frame side went from oldLength to newLength, in 1..MAX_PLATES. */
 export function stretchPlates(plates: number, newLength: number, oldLength: number): number {
-  if (!(oldLength > 0) || !Number.isFinite(newLength)) return plates;
+  if (Number.isNaN(oldLength) || oldLength <= 0 || !Number.isFinite(newLength)) return plates;
   return clamp(Math.round((plates * newLength) / oldLength), 1, MAX_PLATES);
 }
