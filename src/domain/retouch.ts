@@ -52,7 +52,7 @@ function applyTone(image: RgbaImage, tone: Tone): RgbaImage {
   const gain = 1 + tone.contrast / 100;
   const chroma = 1 + tone.saturation / 100;
   for (let i = 0; i < data.length; i += 4) {
-    const rgb = [0, 1, 2].map((c) => clamp(((image.data[i + c] ?? 0) + offset - 128) * gain + 128, 0, 255));
+    const rgb = [0, 1, 2].map((c) => clamp((clamp((image.data[i + c] ?? 0) + offset, 0, 255) - 128) * gain + 128, 0, 255));
     const [r = 0, g = 0, b = 0] = rgb;
     const y = luma(r, g, b);
     for (let c = 0; c < 3; c++) data[i + c] = y + ((rgb[c] ?? 0) - y) * chroma;

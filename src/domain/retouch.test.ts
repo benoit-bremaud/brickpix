@@ -60,6 +60,14 @@ describe('retouch sharpen', () => {
   });
 });
 
+describe('tone clamping', () => {
+  it('clamps brightness before contrast applies', () => {
+    const photo = image(1, 1, () => [250, 250, 250]);
+    // 250 + 128 clamps to 255, then (255 − 128) × 0.5 + 128 = 191.5.
+    expect(pixel(retouch(photo, settings({ brightness: 100, contrast: -50 })), 0, 0)).toEqual([192, 192, 192]);
+  });
+});
+
 describe('flattenBackground', () => {
   const sky: Rgb = [90, 150, 220];
   const shirt: Rgb = [200, 40, 40];
