@@ -183,6 +183,40 @@ describe("Editor import order", () => {
   });
 });
 
+describe("Editor kit", () => {
+  useFakeBrowser();
+
+  async function orderKit() {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "2" } });
+    fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+  }
+
+  it("recomputes the mosaic from the current inputs, before the debounced preview caught up", async () => {
+    await orderKit();
+    expect(screen.getByRole("region", { name: "Votre kit" })).toBeInTheDocument();
+    expect(screen.getAllByRole("figure", { name: /^Plaque/ })).toHaveLength(6);
+    expect(screen.queryByRole("figure", { name: "Aperçu" })).toBeNull();
+    expect(screen.queryByRole("spinbutton", { name: "Largeur (plaques)" })).toBeNull();
+  });
+
+  it("returns to editing on «Retour à l'édition»", async () => {
+    await orderKit();
+    fireEvent.click(screen.getByRole("button", { name: "Retour à l'édition" }));
+    expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
+    expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
+  });
+
+  it("returns to editing when a new photo is imported, keeping the size", async () => {
+    await orderKit();
+    await importPhoto();
+    expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
+    expect(screen.getByLabelText("Largeur (plaques)")).toHaveValue(2);
+  });
+});
+
 describe("computeMosaic", () => {
   it("crops, resamples and quantises: a photo black on the left half and white on the right", () => {
     const photo = { width: 64, height: 32, data: new Uint8ClampedArray(64 * 32 * 4) };

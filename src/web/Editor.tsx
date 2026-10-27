@@ -7,6 +7,7 @@ import { quantise, type QuantiseOptions } from "../domain/quantise";
 import { resample } from "../domain/resample";
 import { decodeFile } from "./canvas/imageIO";
 import { renderMosaic } from "./canvas/renderMosaic";
+import { Kit } from "./kit/Kit";
 
 /** Delay between the last size or dithering change and the preview refresh. */
 export const PREVIEW_DEBOUNCE_MS = 150;
@@ -64,11 +65,24 @@ function useImport() {
   return { source, error, importFile };
 }
 
-/** Import, size and live preview («Aperçu») of the mosaic editor. */
+/**
+ * The kit of the photo it was ordered for; a new photo returns to editing (05-state). The mosaic is
+ * recomputed from the current inputs, never taken from the debounced preview (spec kit.md).
+ */
+function useKit(source: RgbaImage | undefined) {
+  const [kit, setKit] = useState<{ readonly source: RgbaImage; readonly mosaic: Mosaic }>();
+  const order = (current: RgbaImage, size: MosaicSize, dithering: boolean) =>
+    setKit({ source: current, mosaic: computeMosaic(current, size, { dithering }) });
+  const shown = kit !== undefined && kit.source === source ? kit.mosaic : undefined;
+  return { kit: shown, order, back: () => setKit(undefined) };
+}
+
+/** Import, size, live preview («Aperçu») and the «Commander mon kit» screen. */
 export function Editor() {
   const { source, error, importFile } = useImport();
   const [size, setSize] = useState<MosaicSize>(DEFAULT_SIZE);
   const [dithering, setDithering] = useState(false);
+  const { kit, order, back } = useKit(source);
   const [over, setOver] = useState(false);
   const canvas = usePreview(source, size, dithering);
   const onDrop = (event: DragEvent) => {
@@ -86,17 +100,19 @@ export function Editor() {
         <input type="file" accept="image/*" className="visually-hidden" onChange={(event) => void importFile(event.target.files?.[0])} />
       </label>
       {error !== undefined && <p role="alert" className="error">{error}</p>}
-      <div className="controls">
+      <div className="controls" hidden={kit !== undefined}>
         <label>Largeur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesWide} onChange={setPlates("platesWide")} /></label>
         <label>Hauteur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesHigh} onChange={setPlates("platesHigh")} /></label>
         <label><input type="checkbox" checked={dithering} onChange={(event) => setDithering(event.target.checked)} />Tramage</label>
       </div>
       {source !== undefined && (
-        <figure className="preview-figure" aria-labelledby="preview-caption">
+        <figure className="preview-figure" aria-labelledby="preview-caption" hidden={kit !== undefined}>
           <figcaption id="preview-caption">Aperçu</figcaption>
           <canvas ref={canvas} className="preview">Aperçu de la mosaïque en tuiles rondes.</canvas>
+          <button type="button" className="order" onClick={() => order(source, size, dithering)}>Commander mon kit</button>
         </figure>
       )}
+      {kit !== undefined && <Kit mosaic={kit} onBack={back} />}
     </>
   );
 }

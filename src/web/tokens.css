@@ -6,6 +6,8 @@
   --colour-accent: #c91a09;
   --colour-error: #9b1c0f;
   --colour-baseplate: #2b2a27;
+  --colour-ink-dark: #000;
+  --colour-ink-light: #fff;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 1rem;
@@ -13,6 +15,9 @@
   --radius: 0.5rem;
   --font-body: system-ui, sans-serif;
   --preview-max: 40rem;
+  --swatch-size: 1rem;
+  --stud-font: 0.6rem;
+  --stud-font-print: 9pt;
 }
 
 body {
@@ -92,4 +97,124 @@ main {
 .preview-figure figcaption {
   margin-bottom: var(--space-2);
   color: var(--colour-muted);
+}
+
+.order,
+.kit-actions button {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius);
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.order {
+  margin-top: var(--space-3);
+  border-color: var(--colour-accent);
+}
+
+.kit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.spares {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius);
+}
+
+.bill {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.bill caption {
+  text-align: left;
+  font-weight: bold;
+  padding-bottom: var(--space-2);
+}
+
+.bill th,
+.bill td {
+  padding: var(--space-1) var(--space-2);
+  border-bottom: 1px solid var(--colour-border);
+  text-align: left;
+}
+
+.swatch {
+  display: inline-block;
+  width: var(--swatch-size);
+  height: var(--swatch-size);
+  border: 1px solid var(--colour-border);
+  border-radius: 50%;
+  vertical-align: middle;
+}
+
+.plate {
+  margin: var(--space-4) 0 0;
+}
+
+.plate-grid {
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  gap: 1px;
+  padding: var(--space-1);
+  background: var(--colour-baseplate);
+  border-radius: var(--radius);
+}
+
+.stud {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  font-size: var(--stud-font);
+  font-weight: bold;
+}
+
+.stud[data-ink="dark"] {
+  color: var(--colour-ink-dark);
+}
+
+.stud[data-ink="light"] {
+  color: var(--colour-ink-light);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+/* Print: the bill of materials on page 1, then one plate per page (spec kit.md). */
+@media print {
+  h1,
+  main > p,
+  .dropzone,
+  .kit-actions,
+  .spares {
+    display: none;
+  }
+
+  .plate {
+    break-before: page;
+    break-inside: avoid;
+  }
+
+  .stud {
+    font-size: var(--stud-font-print);
+  }
+
+  * {
+    print-color-adjust: exact;
+  }
 }

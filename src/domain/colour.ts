@@ -25,6 +25,11 @@ export function toLab(red: number, green: number, blue: number): Lab {
   return [116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz)];
 }
 
+/** WCAG relative luminance of an sRGB colour (channels 0–255): 0 for black, 1 for white. */
+export function relativeLuminance(red: number, green: number, blue: number): number {
+  return 0.2126 * toLinear(red) + 0.7152 * toLinear(green) + 0.0722 * toLinear(blue);
+}
+
 /** Hue angle in degrees, 0–360. */
 function hue(a: number, b: number): number {
   const h = Math.atan2(b, a) / RAD;
