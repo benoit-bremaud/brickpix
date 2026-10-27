@@ -23,14 +23,14 @@ revised against that supplier's colour chart.
 
 Decision (MCDA, owner, 2026-10-23): 17 colours, the 16 most stocked plus Dark Brown, which fills
 the gap between Black and Reddish Brown for dark hair and skin and is the second colour of the
-official Beatles art-mosaic set. Rejected: 16 colours (no dark brown), about 35 colours (several below 500
-lots).
+official Beatles art-mosaic set (31198). Rejected: 16 colours (no dark brown), about 35 colours
+(several below 500 lots).
 
 ## Colours
 
 The order is the palette order: it fixes the palette index stored in `Mosaic.cells` and the plate
-legend order. RGB is Rebrickable's screen approximation of the plastic. The manufacturer colour and element ids are provenance
-only; the domain type does not carry them.
+legend order. RGB is Rebrickable's screen approximation of the plastic. The manufacturer colour and
+element ids are provenance only; the domain type does not carry them.
 
 | # | id | Name (BrickLink) | RGB | BrickLink id | Manufacturer colour id | Manufacturer element id |
 |---|---|---|---|---|---|---|
@@ -77,11 +77,12 @@ Rebrickable CSV downloads (colours, element ids, set inventories), checked 2026-
 | dark-tan | 2,752 | 39 |
 | dark-brown | 2,329 | 36 |
 
-Lots include used lots. The manufacturer's Pick a Brick stock could not be checked.
+Lots include used lots. The manufacturer's own webshop stock could not be checked.
 
 ## Invariants for the domain table
 
 - 17 entries, in the order above; `id` values are unique kebab-case strings.
 - Each RGB channel is an integer in 0–255; no two colours share an RGB value.
-- BrickLink ids and manufacturer element ids are unique (checked in review; the domain type does not carry element ids).
+- BrickLink ids and manufacturer element ids are unique (element ids live in this spec
+  only, checked by the spec-row test).
 - The table is static, frozen data in `src/domain`; it changes only through this spec.

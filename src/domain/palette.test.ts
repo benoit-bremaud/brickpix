@@ -9,7 +9,7 @@ const colours = ROUND_TILE_PALETTE.colours;
 describe('ROUND_TILE_PALETTE', () => {
   it('matches every row of the palette spec, in order', () => {
     const spec = readFileSync(new URL('../../docs/architecture/specs/palette-round-tiles.md', import.meta.url), 'utf8');
-    const rows = [...spec.matchAll(/^\| \d+ \| `([a-z-]+)` \| ([^|]+?) \| `#([0-9A-F]{6})` \| (\d+) \| \d+ \| \d+ \|$/gm)];
+    const rows = [...spec.matchAll(/^\| \d+ \| `([a-z-]+)` \| ([^|]+?) \| `#([0-9A-F]{6})` \| (\d+) \| \d+ \| (\d+) \|$/gm)];
 
     expect(rows).toHaveLength(17);
     expect(colours).toEqual(
@@ -20,6 +20,10 @@ describe('ROUND_TILE_PALETTE', () => {
         brickLinkColorId: Number(brickLink),
       })),
     );
+
+    const elementIds = rows.map((row) => row[5]);
+    expect(new Set(elementIds).size).toBe(rows.length);
+    expect(elementIds.every((element) => /^\d{7}$/.test(String(element)))).toBe(true);
   });
 
   it('uses unique kebab-case ids, BrickLink ids and RGB values', () => {
