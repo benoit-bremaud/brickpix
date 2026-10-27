@@ -53,8 +53,9 @@ toggle (dithering moves here from the main controls).
 
 - **Auto** (one-shot, on tap): on the resampled studs before tone, luma percentiles `p1` (1 %) and
   `p99` (99 %); `f = min(2, max(0, 255 / max(1, p99 − p1)))`, `k = round(100 × (f − 1))`,
-  `b = round((128 − p1 − 128 / f) / 1.28)` clamped to `−100..100` (`b = 0` when `f = 0`),
-  `s = 15`, sharpen unchanged. A later crop change does not recompute it.
+  `b = round((128 − (p1 + p99) / 2) / 1.28)` clamped to `−100..100` (the midpoint maps to 128,
+  which maps `p1..p99` to `0..255` when `f` is not capped, and keeps a flat photo's tone when it
+  is), `s = 15`, sharpen unchanged. A later crop change does not recompute it.
 - **Moods** set `(b, k, s)`: Naturel `(0, 0, 0)`, Pop `(0, 20, 40)`, Doux `(0, −20, −20)`,
   N&B `(0, 0, −100)`. Sharpen unchanged. Naturel is the tone reset.
 
