@@ -25,6 +25,7 @@
   --stud-gap: 1px;
   --colour-frame-dim: rgb(0 0 0 / 55%); /* outside the frame, drawn on the canvas */
   --colour-frame-edge: #fff;
+  --colour-photo-matte: #fff; /* under transparent pixels, as resample composites them */
   --touch-target: 2.75rem; /* WCAG 2.5.8 comfortable target */
 }
 

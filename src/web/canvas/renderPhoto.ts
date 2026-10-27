@@ -58,6 +58,9 @@ export function renderPhoto(canvas: HTMLCanvasElement, image: RgbaImage, crop: R
   const context = canvas.getContext("2d");
   const bitmap = bitmapOf(image);
   if (context === null || bitmap === undefined) return;
+  // Transparent pixels show over white, as the mosaic chain composites them (resample.ts).
+  context.fillStyle = token(canvas, "--colour-photo-matte");
+  context.fillRect(0, 0, canvas.width, canvas.height);
   context.drawImage(bitmap, shown.x, shown.y, shown.width, shown.height, 0, 0, canvas.width, canvas.height);
   if (view === "frame") {
     drawFrame(canvas, context, { x: crop.x * scale, y: crop.y * scale, width: crop.width * scale, height: crop.height * scale });
