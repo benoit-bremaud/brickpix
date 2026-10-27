@@ -3,20 +3,32 @@ import type { RgbaImage } from "../../domain/mosaic";
 /** Longest decoded side: well above 8 plates × 16 studs, and bounded memory (spec quantise-mosaic.md). */
 export const MAX_DECODE_SIDE = 2048;
 
-/** Decodes a file, downscaled so its longest side is at most MAX_DECODE_SIDE. */
-async function decodeBitmap(file: File): Promise<ImageBitmap> {
-  const full = await createImageBitmap(file);
-  const scale = MAX_DECODE_SIDE / Math.max(full.width, full.height);
-  if (scale >= 1) return full;
+/** Reads the natural size from the file header through a local blob URL, without decoding pixels. */
+async function readSize(file: File): Promise<{ width: number; height: number }> {
+  const url = URL.createObjectURL(file);
   try {
-    return await createImageBitmap(full, {
-      resizeWidth: Math.max(1, Math.round(full.width * scale)),
-      resizeHeight: Math.max(1, Math.round(full.height * scale)),
-      resizeQuality: "high",
+    const image = new Image();
+    await new Promise<void>((resolve, reject) => {
+      image.onload = () => resolve();
+      image.onerror = () => reject(new Error("Not a decodable image."));
+      image.src = url;
     });
+    return { width: image.naturalWidth, height: image.naturalHeight };
   } finally {
-    full.close();
+    URL.revokeObjectURL(url);
   }
+}
+
+/** Decodes a file straight to at most MAX_DECODE_SIDE on its longest side; the full size is never materialised. */
+async function decodeBitmap(file: File): Promise<ImageBitmap> {
+  const { width, height } = await readSize(file);
+  const scale = MAX_DECODE_SIDE / Math.max(width, height);
+  if (scale >= 1) return createImageBitmap(file);
+  return createImageBitmap(file, {
+    resizeWidth: Math.max(1, Math.round(width * scale)),
+    resizeHeight: Math.max(1, Math.round(height * scale)),
+    resizeQuality: "high",
+  });
 }
 
 /**

@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 import * as renderModule from "./canvas/renderMosaic";
 import { computeMosaic, PREVIEW_DEBOUNCE_MS } from "./Editor";
+import { stubImage } from "./test-image";
 
 const PHOTO = { width: 64, height: 48, data: new Uint8ClampedArray(64 * 48 * 4).fill(255) };
 
@@ -31,6 +32,7 @@ async function importPhoto(file = new File(["x"], "photo.png", { type: "image/pn
 function useFakeBrowser() {
   beforeEach(() => {
     vi.useFakeTimers();
+    stubImage(64, 48);
     vi.stubGlobal("createImageBitmap", vi.fn(async () => ({ width: 64, height: 48, close: vi.fn() })));
   });
   afterEach(() => vi.useRealTimers());
@@ -159,6 +161,18 @@ describe("Editor import order", () => {
     await act(async () => releaseFirst({ width: 64, height: 48, close: vi.fn() } as unknown as ImageBitmap));
     act(() => vi.advanceTimersByTime(PREVIEW_DEBOUNCE_MS));
     expect(draw).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores the failure of an import a newer one superseded", async () => {
+    stubCanvas();
+    let failFirst: (reason: Error) => void = () => undefined;
+    vi.mocked(createImageBitmap).mockReturnValueOnce(new Promise<ImageBitmap>((_resolve, reject) => { failFirst = reject; }));
+    render(<App />);
+    await importPhoto();
+    await importPhoto();
+    await act(async () => failFirst(new Error("late")));
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
   });
 
   it("reports a missing 2D context as a decode error", async () => {

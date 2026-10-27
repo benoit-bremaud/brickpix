@@ -57,6 +57,7 @@ function useImport() {
       setSource(image);
       setError(undefined);
     } catch {
+      if (id !== latestImport.current) return;
       setError("Impossible de lire cette image. Essayez un fichier JPEG, PNG ou WebP.");
     }
   };
@@ -82,7 +83,7 @@ export function Editor() {
     <>
       <label className="dropzone" data-over={over} onDragOver={(event) => { event.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={onDrop}>
         <span>Choisissez une photo ou déposez-la ici</span>
-        <input type="file" accept="image/*" hidden onChange={(event) => void importFile(event.target.files?.[0])} />
+        <input type="file" accept="image/*" className="visually-hidden" onChange={(event) => void importFile(event.target.files?.[0])} />
       </label>
       {error !== undefined && <p role="alert" className="error">{error}</p>}
       <div className="controls">

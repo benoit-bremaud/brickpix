@@ -1,47 +1,54 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { stubImage } from "../test-image";
 import { decodeFile, MAX_DECODE_SIDE } from "./imageIO";
 
-function bitmap(width: number, height: number) {
-  return { width, height, close: vi.fn() };
-}
-
 function stubContext() {
-  const getImageData = vi.fn((_x: number, _y: number, width: number, height: number) => ({
-    width,
-    height,
-    data: new Uint8ClampedArray(4),
-  }));
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
     drawImage: vi.fn(),
-    getImageData,
+    getImageData: vi.fn((_x: number, _y: number, width: number, height: number) => ({
+      width,
+      height,
+      data: new Uint8ClampedArray(4),
+    })),
   } as unknown as CanvasRenderingContext2D);
-  return getImageData;
+}
+
+function stubBitmaps(width: number, height: number) {
+  const create = vi.fn(async (_file: unknown, options?: { resizeWidth: number; resizeHeight: number }) => ({
+    width: options?.resizeWidth ?? width,
+    height: options?.resizeHeight ?? height,
+    close: vi.fn(),
+  }));
+  vi.stubGlobal("createImageBitmap", create);
+  return create;
 }
 
 describe("decodeFile", () => {
-  afterEach(() => vi.restoreAllMocks());
-
-  it("keeps a photo whose longest side fits", async () => {
-    const small = bitmap(800, 600);
-    const create = vi.fn(async () => small);
-    vi.stubGlobal("createImageBitmap", create);
+  it("decodes a photo whose longest side fits at its own size", async () => {
+    stubImage(800, 600);
+    const create = stubBitmaps(800, 600);
     stubContext();
     const image = await decodeFile(new File(["x"], "p.png"));
     expect([image.width, image.height]).toEqual([800, 600]);
     expect(create).toHaveBeenCalledTimes(1);
-    expect(small.close).toHaveBeenCalled();
+    expect(create.mock.lastCall?.[1]).toBeUndefined();
   });
 
-  it("downscales a large photo to MAX_DECODE_SIDE on its longest side", async () => {
-    const full = bitmap(8000, 6000);
-    const create = vi.fn(async (_source: unknown, options?: { resizeWidth: number; resizeHeight: number }) =>
-      options === undefined ? full : bitmap(options.resizeWidth, options.resizeHeight),
-    );
-    vi.stubGlobal("createImageBitmap", create);
+  it("decodes a large photo straight to MAX_DECODE_SIDE, never at full size", async () => {
+    stubImage(8000, 6000);
+    const create = stubBitmaps(8000, 6000);
     stubContext();
     const image = await decodeFile(new File(["x"], "p.jpg"));
     expect([image.width, image.height]).toEqual([MAX_DECODE_SIDE, 1536]);
-    expect(full.close).toHaveBeenCalled();
+    expect(create).toHaveBeenCalledTimes(1);
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:local");
+  });
+
+  it("rejects a file the browser cannot read", async () => {
+    stubImage(0, 0, true);
+    const create = stubBitmaps(0, 0);
+    await expect(decodeFile(new File(["x"], "p.txt"))).rejects.toThrow("Not a decodable image.");
+    expect(create).not.toHaveBeenCalled();
   });
 });
