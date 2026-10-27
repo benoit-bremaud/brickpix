@@ -92,6 +92,22 @@ describe("Editor debounce", () => {
   });
 });
 
+describe("Editor debounce and kit", () => {
+  useFakeBrowser();
+
+  it("drops a pending preview when the kit is ordered", async () => {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    const draw = vi.spyOn(renderModule, "renderMosaic");
+    fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "4" } });
+    fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
+    act(() => vi.runAllTimers());
+    expect(screen.getByRole("heading", { name: "Votre kit" })).toBeInTheDocument();
+    expect(draw).not.toHaveBeenCalled();
+  });
+});
+
 describe("Editor controls", () => {
   useFakeBrowser();
 

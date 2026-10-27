@@ -24,11 +24,12 @@ function clampPlates(value: string): number {
 }
 
 /** Recomputes and draws the preview, debounced except right after an import. */
-function usePreview(source: RgbaImage | undefined, size: MosaicSize, dithering: boolean) {
+function usePreview(source: RgbaImage | undefined, size: MosaicSize, dithering: boolean, paused: boolean) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const shown = useRef<RgbaImage | undefined>(undefined);
   useEffect(() => {
-    if (source === undefined) return;
+    // paused: the kit computes its own mosaic; a pending preview would repeat that work (Codex P2).
+    if (source === undefined || paused) return;
     const draw = () => {
       shown.current = source;
       if (canvas.current !== null) renderMosaic(canvas.current, computeMosaic(source, size, { dithering }));
@@ -39,7 +40,7 @@ function usePreview(source: RgbaImage | undefined, size: MosaicSize, dithering: 
     }
     const timer = setTimeout(draw, PREVIEW_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [source, size, dithering]);
+  }, [source, size, dithering, paused]);
   return canvas;
 }
 
@@ -102,7 +103,7 @@ export function Editor() {
   const [dithering, setDithering] = useState(false);
   const { kit, preparing, order, back, orderButton } = useKit(source);
   const [over, setOver] = useState(false);
-  const canvas = usePreview(source, size, dithering);
+  const canvas = usePreview(source, size, dithering, preparing || kit !== undefined);
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
     setOver(false);
