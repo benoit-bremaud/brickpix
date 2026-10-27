@@ -14,11 +14,11 @@ Local pre-push review of the retouch brick (#10). It lists the reconciled findin
 |---|---|
 | 1 Tests | ✅ 152 unit/integration (Vitest, domain + web) · no E2E suite in the project |
 | 2 Coverage | tests 98.9 % stmts / 88.2 % branches / 100 % funcs / 100 % lines (floor 80) · docs ≈ 90 % after the added docstrings (estimate, floor 90) |
-| 3 SonarQube | ⚠️ not run yet: runs after the push |
+| 3 SonarQube | ✅ PASSED on 89d3f27 (12 new smells fixed first: read-only props, fieldset toolbar, nested ternary, for-of, NaN guard) |
 | 4 Secrets | ✅ gitleaks clean (`origin/main..HEAD`, 5 commits) · no tracked .env · diff read: nothing sensitive |
 | 5 QA pass | ✅ pass · desktop and 375 px · no console errors · report: docs/architecture/qa/2026-10-27-retouch.md |
 
-- Gate: **RED: SonarQube pending** (re-check after push)
+- Gate: **GREEN: merge authorised once the owner approves**
 
 ## 🔴 Must Have
 
