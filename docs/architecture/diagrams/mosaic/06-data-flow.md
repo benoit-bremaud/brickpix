@@ -11,13 +11,15 @@ it and every image derived from it stay in browser memory.
 flowchart LR
     File[/"Photo file 🔒 PII"/] -- "PII: photo pixels" --> Decode["Decode"]
     Decode --> Src[("Source RgbaImage 🔒<br/>memory only")]
-    Src -- "PII: photo pixels" --> Retouch["Retouch"]
-    Settings[/"Retouch settings"/] --> Retouch
-    Retouch --> Ret[("Retouched image 🔒")]
-    Ret --> Resample["Resample to studs"]
-    Size[/"Mosaic size"/] --> Resample
-    Size -- "crop ratio" --> Retouch
-    Resample --> Quantise["Quantise"]
+    Src -- "PII: photo pixels" --> Frame["Orient and crop"]
+    Settings[/"Retouch settings"/] --> Frame
+    Size[/"Mosaic size"/] -- "crop ratio" --> Frame
+    Frame --> Resample["Resample to studs"]
+    Size --> Resample
+    Resample --> Retouch["Retouch studs<br/>(tone, sharpen, background)"]
+    Settings --> Retouch
+    Retouch --> Ret[("Retouched studs 🔒")]
+    Ret --> Quantise["Quantise"]
     Pal[("Palette (static)")] --> Quantise
     Dither[/"Dithering on/off"/] --> Quantise
     Quantise -- "PII: low-res likeness" --> Mosaic[("Mosaic 🔒<br/>palette indices")]
@@ -36,6 +38,7 @@ flowchart LR
         BomOut
         Decode
         Src
+        Frame
         Retouch
         Ret
         Resample

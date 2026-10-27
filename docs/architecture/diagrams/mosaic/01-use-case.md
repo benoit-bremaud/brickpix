@@ -52,8 +52,10 @@ flowchart LR
   is the LEGO Art standard 48 × 48; 4 × 4, 6 × 4 and larger for giant mosaics). Default 3 × 3. The
   size sets the crop ratio, so changing it re-fits the crop.
 - **Retouch the photo**, optional and repeatable, is the differentiator against prior art. Its
-  adjustments: crop (ratio locked to the size), brightness, contrast, saturation, sharpen,
-  background simplification.
+  tools ([retouch.md](../../specs/retouch.md)): «Cadrer» (crop with the ratio locked to the size,
+  quarter turn, mirror, and the size itself), «Ambiance» (Auto, moods, brightness, contrast,
+  saturation, sharpen, dithering) and «Fond» (background simplification). Few controls at rest;
+  a tap reveals only the options of its tool.
 - **Preview** quantises the retouched photo to the palette of 1 × 1 round tiles and renders it. It
   is live: every size, retouch or dithering change refreshes it (debounced).
 - **Get the kit** always gives the build plan split per plate (numbered 16 × 16 grid with a colour

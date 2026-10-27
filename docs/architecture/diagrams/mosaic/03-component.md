@@ -18,8 +18,8 @@ flowchart TB
     end
 
     subgraph domain["src/domain (pure TypeScript)"]
-        Retouch["retouch"]
-        Crop["crop<br/>(default centred crop, until retouch)"]
+        Retouch["retouch<br/>(tone, sharpen, background, autoTone, moods)"]
+        Crop["crop<br/>(orient, cropFor, size from frame)"]
         Resample["resample"]
         Palette["palette<br/>(1 × 1 round tile colours)"]
         Quantise["quantise<br/>(nearest colour, dithering)"]
@@ -36,6 +36,7 @@ flowchart TB
     Kit --> Export
     Editor --> Retouch
     Editor --> Crop
+    Retouch --> Colour
     Editor --> Resample
     Editor --> Quantise
     Kit --> Plan
@@ -52,7 +53,8 @@ flowchart TB
 ## Notes
 
 - `mosaic` holds the shared domain types and size rules; every domain module may import it (arrows
-  omitted for legibility). `crop` folds into `retouch` in #10.
+  omitted for legibility). `crop` frames the source, `retouch` works on the stud grid
+  ([retouch.md](../../specs/retouch.md)).
 - No network egress: there is no API client component. Outputs leave the page only on the user's
   action: the printed plan, the BrickLink XML copied to the clipboard or downloaded as a file.
 - The plan is an HTML/CSS grid, not a canvas (spec [kit.md](../../specs/kit.md)): vector print,

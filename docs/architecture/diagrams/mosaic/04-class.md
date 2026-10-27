@@ -15,12 +15,23 @@ classDiagram
         +data: Uint8ClampedArray
     }
     class RetouchSettings {
-        +crop: Rect
+        +framing: Framing
         +brightness: number
         +contrast: number
         +saturation: number
         +sharpen: number
-        +simplifyBackground: boolean
+        +background: Background
+    }
+    class Framing {
+        +zoom: number
+        +centreX: number
+        +centreY: number
+        +quarterTurns: 0..3
+        +mirrored: boolean
+    }
+    class Background {
+        +enabled: boolean
+        +tolerance: number
     }
     class Rect {
         +x: number
@@ -63,7 +74,9 @@ classDiagram
         +spares: number
     }
 
-    RetouchSettings *-- Rect
+    RetouchSettings *-- Framing
+    RetouchSettings *-- Background
+    Framing ..> Rect : cropFor(w, h, size)
     Palette *-- "1..*" PaletteColour
     Mosaic *-- MosaicSize
     Mosaic --> Palette
@@ -78,7 +91,8 @@ classDiagram
 
 - `MosaicSize` counts base plates; studs are `16 × plates`. Both counts are integers ≥ 1.
 - `Mosaic.cells` holds one palette index per stud, row-major (`studsWide × studsHigh`).
-- `RetouchSettings.crop` keeps the `platesWide:platesHigh` ratio of the current size.
+- `cropFor` returns a `Rect` with the `platesWide:platesHigh` ratio of the current size; ranges and
+  formulas of every setting live in [retouch.md](../../specs/retouch.md).
 - `PlatePlan.cells` is the 16 × 16 slice of one plate; plates are numbered row-major from the top
   left, which is the build order. `legend` lists the colours used on that plate, in palette order;
   the plan grid prints each stud's legend number.
