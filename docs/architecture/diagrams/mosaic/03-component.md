@@ -12,8 +12,9 @@ flowchart TB
     subgraph web["src/web (React + Canvas)"]
         Editor["Editor<br/>(state, screens)"]
         ImageIO["canvas/imageIO<br/>(decode File, draw photo)"]
-        Render["canvas/renderMosaic<br/>(round studs preview, numbered plate grids)"]
-        Download["download<br/>(Blob URL)"]
+        Render["canvas/renderMosaic<br/>(round studs preview)"]
+        Kit["Kit<br/>(bill of materials table, HTML plate grids, print CSS)"]
+        Export["export<br/>(clipboard copy, Blob URL download)"]
     end
 
     subgraph domain["src/domain (pure TypeScript)"]
@@ -31,14 +32,15 @@ flowchart TB
 
     Editor --> ImageIO
     Editor --> Render
-    Editor --> Download
+    Editor --> Kit
+    Kit --> Export
     Editor --> Retouch
     Editor --> Crop
     Editor --> Resample
     Editor --> Quantise
-    Editor --> Plan
-    Editor --> Bom
-    Editor --> BrickLink
+    Kit --> Plan
+    Kit --> Bom
+    Kit --> BrickLink
     Quantise --> Palette
     Quantise --> Colour
     Bom --> Palette
@@ -50,7 +52,9 @@ flowchart TB
 
 - `mosaic` holds the shared domain types and size rules; every domain module may import it (arrows
   omitted for legibility). `crop` folds into `retouch` in #10.
-- No network egress: there is no API client component. The only output leaving the page is a file
-  the user downloads.
+- No network egress: there is no API client component. Outputs leave the page only on the user's
+  action: the printed plan, the BrickLink XML copied to the clipboard or downloaded as a file.
+- The plan is an HTML/CSS grid, not a canvas (spec [kit.md](../../specs/kit.md)): vector print,
+  testable in the DOM, light on memory for 8 × 8 plates.
 - The purity of `src/domain` is enforced by `tsconfig.domain.json` (no DOM lib) and the ESLint
   import rule set up in brick 1.

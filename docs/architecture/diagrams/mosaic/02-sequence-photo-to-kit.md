@@ -31,16 +31,18 @@ sequenceDiagram
     end
 
     Maker->>UI: Commander mon kit
+    UI->>Domain: computeMosaic(current photo, size, dithering)
+    Domain-->>UI: Mosaic
     UI->>Domain: buildPlan(mosaic)
     Domain-->>UI: PlatePlan[] (row-major, 16 × 16 each, with legend)
-    UI->>Domain: billOfMaterials(mosaic)
-    Domain-->>UI: BillOfMaterials (tiles per colour, base plates)
-    UI->>Canvas: draw numbered plate grids
+    UI->>Domain: billOfMaterials(mosaic, sparePercent = 2)
+    Domain-->>UI: BillOfMaterials (tiles per colour, spares, base plates)
+    UI-->>Maker: kit screen: table and HTML plate grids
     opt Export the BrickLink wanted list
-        Maker->>UI: Export
+        Maker->>UI: Copier / Télécharger la liste BrickLink
         UI->>Domain: toBrickLinkXml(bom)
         Domain-->>UI: string (XML)
-        UI-->>Maker: download via Blob URL (local, no upload)
+        UI-->>Maker: clipboard, or download via Blob URL (local, no upload)
     end
 ```
 
@@ -50,6 +52,8 @@ sequenceDiagram
   typed arrays, so it is unit-testable without a DOM.
 - Retouch always restarts from the decoded source, never from the previous result, so adjustments
   do not accumulate rounding loss. The crop rectangle is clamped to the `N:M` ratio of the size.
+- The kit (plan, bill of materials, XML, screen) is specified in
+  [kit.md](../../specs/kit.md).
 - Crop, resample and quantise are specified in
   [quantise-mosaic.md](../../specs/quantise-mosaic.md).
 - Algorithms (V1 defaults, each a domain spec to detail before its code brick): colour distance
