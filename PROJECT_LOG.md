@@ -101,3 +101,36 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   findings (stale inputs, table reflow at 200 % text, pending preview), all fixed and answered
   inline. Review threads must be resolved before the merge (branch rule). Gate: 100 tests, 100 %
   of lines and 94 % of branches, docs 100 %, SonarQube passed, Gitleaks clean.
+- **PR #34 merged** (`1ec3b5b`): chore(deps), update wrangler to 4.152.0 and its tooling
+  dependencies, with an `undici` override scoped to wrangler. The advisory gave no detail.
+- **PR #39 merged** (`a0f81ea`): feat(image), retouch before quantisation, closes #10 (brick 6).
+  Spec `docs/architecture/specs/retouch.md`, validated by the owner on 2026-10-27; diagrams
+  01–06 updated.
+  - Chain: orient → crop → resample → brightness → contrast → saturation → sharpen →
+    background → quantise. The tone steps run on the stud grid.
+  - Three tools in a minimalist toolbar with progressive disclosure:
+    - «Cadrer»: zoom 1–8, pan, quarter turn, mirror, size steppers, handles that stretch the size.
+    - «Ambiance»: Auto, the moods Naturel, Pop, Doux and N&B, and «Plus» for the sliders and
+      dithering.
+    - «Fond»: CIEDE2000 region growing from the top and side borders, with a tolerance from 5 to 20.
+  - A long press or Space shows the photo before retouch. A new photo resets the retouch and
+    keeps the size. The photo never leaves the browser.
+  - Local review: 2 Must, both fixed. The component diagram had drifted, and the bottom corners
+    were seeded although the spec excludes the bottom row. 5 Should fixed. The clamp refactor,
+    the one-component-per-file split and the renames are deferred to #38.
+  - SonarQube flagged 12 new smells, all fixed: read-only props, a `fieldset` toolbar, a nested
+    ternary.
+  - Codex left 7 P2 findings over 5 rounds, all fixed and answered inline:
+    - clamp brightness before contrast;
+    - end «before» on blur;
+    - a white matte under transparent pixels;
+    - keep a draggable middle in small frames;
+    - drag the frame with the finger;
+    - wheel zoom scaled by distance.
+
+    It was still reviewing the last commit when the owner authorised the merge on a green local
+    CI.
+  - Gate: 156 tests, 98.9 % of statements, 88.5 % of branches and 100 % of lines covered,
+    SonarQube passed, Gitleaks clean. QA reports: `docs/architecture/qa/2026-10-27-retouch.md`
+    (full pass) and `…-retouch-smoke.md`.
+  - Follow-ups: #35, #36, #37 (remove the LEGO trademark), #38.
