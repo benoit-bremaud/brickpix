@@ -72,3 +72,18 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   gate: 0 Must, 2 Should fixed (deep freeze; the test parses the spec and checks all 17 rows).
   **Waiver** (owner, 2026-10-24): Codex hit its usage limit again; merged on the local gate
   (tests and docs 100 %, SonarQube passed, Gitleaks clean) and green CI.
+- **PR #18 merged** (`efe3e3c`) — feat(image): import, mosaic size and live preview, closes #8
+  (brick 4). Spec `docs/architecture/specs/quantise-mosaic.md`, validated by the owner on
+  2026-10-27. Until #10 the crop is the largest N:M rectangle centred in the photo. Resampling is
+  an area average with transparency composited over white. Each stud takes the nearest palette
+  colour by CIEDE2000 (checked against 10 Sharma reference pairs). Floyd–Steinberg dithering is
+  optional, with a serpentine scan. The preview refreshes after a 150 ms debounce. Decoding
+  resizes the photo to a 2048 px longest side and never builds the full-size bitmap. Owner MCDA:
+  at most 8 plates per side, 470/500 (measured on a laptop: 8×8 in 88 ms, 16×16 in 335 ms), and
+  dithering off by default, 430/500. Local gate: 1 Must (diagrams out of step with the code) and
+  8 Should, all fixed. SonarQube flagged 3 new issues (2 accessibility, 1 CSS duplicate), all
+  fixed. Codex round 1 left 3 findings (a P1 file input unreachable by keyboard, a P2 full-size
+  decode, a P2 error from a superseded import), all fixed and answered inline. Round 2 found
+  nothing. Copilot posted no review. Gate: 55 tests, 100 % of lines and 94.9 % of branches,
+  docs 100 %, SonarQube passed, Gitleaks clean, QA report and screenshots in
+  `docs/architecture/qa/2026-10-27-preview.md`.
