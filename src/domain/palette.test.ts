@@ -9,33 +9,30 @@ const colours = ROUND_TILE_PALETTE.colours;
 describe('ROUND_TILE_PALETTE', () => {
   it('matches every row of the palette spec, in order', () => {
     const spec = readFileSync(new URL('../../docs/architecture/specs/palette-round-tiles.md', import.meta.url), 'utf8');
-    const rows = [...spec.matchAll(/^\| \d+ \| `([a-z-]+)` \| ([^|]+?) \| `#([0-9A-F]{6})` \| (\d+) \| \d+ \| (\d+) \|$/gm)];
+    const rows = [...spec.matchAll(/^\| \d+ \| `([a-z-]+)` \| ([^|]+?) \| `#([0-9A-F]{6})` \| (\d+) \| \d+ \| \d+ \|$/gm)];
 
     expect(rows).toHaveLength(17);
     expect(colours).toEqual(
-      rows.map(([, id, name, hex, brickLink, element]) => ({
+      rows.map(([, id, name, hex, brickLink]) => ({
         id,
         name,
         rgb: [0, 2, 4].map((i) => Number.parseInt(String(hex).slice(i, i + 2), 16)),
         brickLinkColorId: Number(brickLink),
-        legoElementId: element,
       })),
     );
   });
 
-  it('uses unique kebab-case ids, BrickLink ids, element ids and RGB values', () => {
+  it('uses unique kebab-case ids, BrickLink ids and RGB values', () => {
     expect(colours.every((c) => /^[a-z]+(-[a-z]+)*$/.test(c.id))).toBe(true);
     expect(new Set(colours.map((c) => c.id)).size).toBe(colours.length);
     expect(new Set(colours.map((c) => c.brickLinkColorId)).size).toBe(colours.length);
-    expect(new Set(colours.map((c) => c.legoElementId)).size).toBe(colours.length);
     expect(new Set(colours.map((c) => c.rgb.join(','))).size).toBe(colours.length);
   });
 
-  it('keeps every RGB channel an integer in 0-255 and every element id numeric', () => {
-    for (const { rgb, legoElementId } of colours) {
+  it('keeps every RGB channel an integer in 0-255', () => {
+    for (const { rgb } of colours) {
       expect(rgb).toHaveLength(3);
       expect(rgb.every((v) => Number.isInteger(v) && v >= 0 && v <= 255)).toBe(true);
-      expect(legoElementId).toMatch(/^\d{7}$/);
     }
   });
 

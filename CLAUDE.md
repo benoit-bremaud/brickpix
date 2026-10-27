@@ -1,6 +1,6 @@
 # brickpix — project instructions
 
-Photo to LEGO Art mosaic, in the browser. Product intent lives in `docs/product/`, the conception
+Photo to round-tile brick mosaic, in the browser. Product intent lives in `docs/product/`, the conception
 in `docs/architecture/`. Read them before changing anything.
 
 ## No conception, no code (owner rule, non-negotiable)

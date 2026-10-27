@@ -56,7 +56,7 @@ Status: validated by the owner on 2026-10-27 (issue #8). Implements `resample` a
 - `MAX_PLATES = 8` (MCDA 470/500, against 12 at 430 and 16 at 380). Measured on a laptop,
   naive CIEDE2000 over random pixels: 3×3 15 ms, 8×8 88 ms, 12×12 210 ms, 16×16 335 ms; mobile
   is about 3–4 times slower. Raising it later needs a per-colour cache or the deferred Web Worker.
-- Dithering off by default (MCDA 430/500 against 335): flat areas like LEGO Art sets and an
+- Dithering off by default (MCDA 430/500 against 335): flat areas like official art-mosaic sets and an
   easier plan; the toggle stays available.
 
 ## Invariants
