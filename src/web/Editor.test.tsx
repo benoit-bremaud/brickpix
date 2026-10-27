@@ -190,14 +190,24 @@ describe("Editor kit busy state", () => {
     stubCanvas();
     render(<App />);
     await importPhoto();
+    const controls = screen.getByLabelText("Largeur (plaques)").closest(".controls");
+    const dropzone = screen.getByText(/Choisissez une photo/).closest("label");
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+    expect(controls).not.toHaveAttribute("inert");
+    expect(dropzone).not.toHaveAttribute("inert");
+
     fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
     expect(screen.getByRole("status")).toHaveTextContent("Préparation du kit…");
     expect(screen.getByRole("button", { name: "Commander mon kit" })).toBeDisabled();
-    expect(screen.getByLabelText("Largeur (plaques)").closest(".controls")).toHaveAttribute("inert");
-    expect(screen.getByText(/Choisissez une photo/).closest("label")).toHaveAttribute("inert");
+    expect(controls).toHaveAttribute("inert");
+    expect(dropzone).toHaveAttribute("inert");
+
+    act(() => vi.advanceTimersToNextFrame()); // the message is painted, the computation still waits
+    expect(screen.getByRole("status")).toHaveTextContent("Préparation du kit…");
     expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
-    act(() => vi.runAllTimers());
+    act(() => vi.runOnlyPendingTimers()); // the setTimeout(0) runs the computation
     expect(screen.getByRole("region", { name: "Votre kit" })).toBeInTheDocument();
+    expect(controls).not.toHaveAttribute("inert");
   });
 });
 
@@ -228,6 +238,8 @@ describe("Editor kit", () => {
     expect(screen.queryByRole("region", { name: "Votre kit" })).toBeNull();
     expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Commander mon kit" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Commander mon kit" })).toBeEnabled();
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
   });
 
   it("returns to editing when a new photo is imported, keeping the size", async () => {

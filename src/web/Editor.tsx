@@ -68,6 +68,7 @@ function useImport() {
 /**
  * The kit of the photo it was ordered for; a new photo returns to editing (05-state). The mosaic is
  * recomputed from the current inputs, never taken from the debounced preview (spec kit.md).
+ * `preparing` is true from the click until the kit is set, so the editor freezes its inputs.
  */
 function useKit(source: RgbaImage | undefined) {
   const [kit, setKit] = useState<{ readonly source: RgbaImage; readonly mosaic: Mosaic }>();

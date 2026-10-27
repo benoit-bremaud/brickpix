@@ -52,6 +52,14 @@ describe("Kit bill of materials", () => {
     expect(totalsOf("Plaques de base 16 × 16")).toEqual(["2", "2"]);
   });
 
+  it("wraps the bill in a scroll region named by its caption", () => {
+    render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
+
+    const region = screen.getByRole("region", { name: "Liste des pièces" });
+    expect(within(region).getByRole("table", { name: "Liste des pièces" })).toBeInTheDocument();
+    expect(region).toHaveAttribute("tabindex", "0"); // keyboard scrolling in WebKit
+  });
+
   it("focuses its heading when it opens", () => {
     render(<Kit mosaic={makeMosaic()} onBack={vi.fn()} />);
 

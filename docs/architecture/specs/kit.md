@@ -51,16 +51,19 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 - Buttons: «Commander mon kit», «Retour à l'édition», «Imprimer le plan», «Copier la liste
   BrickLink», «Télécharger la liste BrickLink» (explicit labels, WCAG 2.4.6 and 2.5.3).
 - «Commander mon kit» first shows «Préparation du kit…» (an `<output>` status message, the button
-  disabled, the photo and size inputs inert), lets the browser paint it, then recomputes the mosaic from the current photo, size
-  and dithering (it does not reuse the debounced preview) and shows the kit.
+  disabled, the photo, size and dithering inputs inert), lets the browser paint it, then recomputes
+  the mosaic from the current photo, size and dithering (it does not reuse the debounced preview)
+  and shows the kit. «Retour à l'édition» returns to `Editing` and discards the kit.
 - Each plate has `content-visibility: auto`, so only the plates on screen are laid out and
-  painted; print still renders every plate. Measured on the production build at 8 × 8: 375 → 148 ms
-  on a desktop CPU, 1250 → 550 ms with the CPU slowed 4× (phone profile). Budget: feedback under
-  100 ms, kit under 1 s on a phone (RAIL); going below 200 ms on a phone is #28. «Retour à l'édition»
-  returns to `Editing` and discards it.
+  painted; print sets it back to `visible`, so every plate prints. Measured on the production build
+  at 8 × 8: 375 → 148 ms on a desktop CPU, 1250 → 550 ms with the CPU slowed 4× (phone profile).
+  Budget: feedback under 100 ms, kit under 1 s on a phone (RAIL); going below 200 ms on a phone is
+  #28.
 - Bill of materials: a table with four columns «N°», «Couleur» (swatch and BrickLink name), «À
   poser», «À acheter»; the footer gives the tile totals and the base plates. Spares read as the
-  difference of the last two columns.
+  difference of the last two columns. The table scrolls sideways in its own labelled region on a
+  narrow screen or with large text; the page itself never scrolls sideways (#30). The region is
+  focusable (`tabIndex={0}`, visible focus ring): WebKit does not focus a scroll region on its own.
 - Spares: a `fieldset` «Pièces de rechange» of three native radios «Aucune», «2 % (conseillé)»,
   «5 %» (default 2 %); a change updates the table and the XML.
 - Plan: per plate, a caption «Plaque N (colonne c, rangée r)», a 16 × 16 HTML/CSS grid of round
@@ -69,6 +72,8 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
   The domain gives `relativeLuminance(red, green, blue)` (in `colour.ts`, reusing the sRGB linearisation); the
   web picks the ink and maps it to the ink tokens.
   On the 17 colours the lowest ratio is 5.2:1 (Dark Bluish Gray, white ink), above AA 4.5:1.
+- Stud and swatch colours are data: they keep their colour in forced-colors mode
+  (`forced-color-adjust: none`, #29).
 - «Imprimer le plan» calls `window.print()`; a `@media print` style hides the controls, prints the
   bill of materials on the first page, then one plate per page (A4: about 11 mm per cell).
 - «Copier la liste BrickLink» writes the XML with `navigator.clipboard.writeText`; on failure it
@@ -88,7 +93,8 @@ starts with `<INVENTORY>`, nothing before it (the buyer pastes it into BrickLink
 | Spares | selector 0 / 2 / 5 %, min 1 per colour | 430 vs checkbox 420, exact 365, forced 330 |
 | Spares default | 2 % | 415 vs 0 % 385, 5 % 385, forced choice 375 |
 | Plan rendering | HTML/CSS grid (vector print, testable, light on memory) | 445 vs SVG 405, canvas→PNG 375, canvas 2× 335 |
-| Kit trigger | synchronous recompute on click | 440 vs keyed memo 430, flush 375, disabled button 355 |
+| Kit trigger | recompute from the current inputs on click (since PERF-01: after one painted frame, see «Kit speed») | 440 vs keyed memo 430, flush 375, disabled button 355 |
+| Bill scroll region keyboard access | `tabIndex={0}` + `NOSONAR S6845`, tested on WebKit, Chromium, Firefox | 445 vs cards on mobile 385 (#27), no tabIndex 310 |
 | Kit speed (QA PERF-01, #28) | busy state + `content-visibility` on plates | 400 vs waiver 360, plates in batches 305 |
 | XML fields | minimal + `CONDITION N` | 460 vs minimal 430, + `REMARKS` 395 |
 | Export | copy and download | 440 vs textarea + download 435, download 400, copy 360 |

@@ -20,6 +20,7 @@
   --stud-font: 0.6rem;
   --stud-font-print: 9pt;
   --studs-per-plate: 16;
+  --focus-ring-width: 2px;
   --plate-estimated-height: 40rem; /* placeholder size of an off-screen plate */
   --stud-gap: 1px;
 }
@@ -143,6 +144,11 @@ main {
   overflow-x: auto;
 }
 
+.bill-scroll:focus-visible {
+  outline: var(--focus-ring-width) solid var(--colour-accent);
+  outline-offset: var(--space-1);
+}
+
 .bill {
   width: 100%;
   border-collapse: collapse;
@@ -230,6 +236,7 @@ main {
   .plate {
     break-before: page;
     break-inside: avoid;
+    content-visibility: visible;
   }
 
   .stud {

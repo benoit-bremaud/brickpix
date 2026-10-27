@@ -10,9 +10,11 @@ export function BillTable({ bom, palette }: Props) {
   const bought = bom.tiles.reduce((sum, line) => sum + tilesToBuy(line), 0);
   return (
     // A data table keeps its columns; on a narrow screen or large text it scrolls on its own, not the page.
-    <section className="bill-scroll" aria-label="Liste des pièces">
+    // tabIndex: WebKit does not focus a scroll region by itself (tested), keyboard users must reach it
+    // (WCAG 2.1.1, owner decision MCDA 445 in spec kit.md).
+    <section className="bill-scroll" aria-labelledby="bill-caption" tabIndex={0}> {/* NOSONAR S6845 */}
       <table className="bill">
-        <caption>Liste des pièces</caption>
+        <caption id="bill-caption">Liste des pièces</caption>
         <thead>
           <tr><th scope="col">N°</th><th scope="col">Couleur</th><th scope="col">À poser</th><th scope="col">À acheter</th></tr>
         </thead>
