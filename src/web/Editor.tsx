@@ -91,8 +91,8 @@ export function Editor() {
         <label><input type="checkbox" checked={dithering} onChange={(event) => setDithering(event.target.checked)} />Tramage</label>
       </div>
       {source !== undefined && (
-        <figure className="preview-figure">
-          <figcaption>Aperçu</figcaption>
+        <figure className="preview-figure" aria-labelledby="preview-caption">
+          <figcaption id="preview-caption">Aperçu</figcaption>
           <canvas ref={canvas} className="preview">Aperçu de la mosaïque en tuiles rondes.</canvas>
         </figure>
       )}

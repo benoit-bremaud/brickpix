@@ -121,7 +121,7 @@ describe("Editor import", () => {
   it("imports a dropped photo", async () => {
     stubCanvas();
     render(<App />);
-    const zone = screen.getByText(/Choisissez une photo/);
+    const zone = screen.getByText(/Choisissez une photo/).closest("label") as HTMLLabelElement;
     fireEvent.dragOver(zone);
     expect(zone).toHaveAttribute("data-over", "true");
     fireEvent.dragLeave(zone);
