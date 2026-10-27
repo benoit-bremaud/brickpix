@@ -42,7 +42,7 @@ describe("Editor preview", () => {
   it("shows the import prompt and no preview before a photo", () => {
     render(<App />);
     expect(screen.getByText(/Choisissez une photo/)).toBeInTheDocument();
-    expect(screen.queryByRole("img", { name: /Aperçu/ })).toBeNull();
+    expect(screen.queryByRole("figure", { name: "Aperçu" })).toBeNull();
   });
 
   it("draws the preview at once after an import, at the default 3 × 3", async () => {
@@ -50,7 +50,7 @@ describe("Editor preview", () => {
     const draw = vi.spyOn(renderModule, "renderMosaic");
     render(<App />);
     await importPhoto();
-    expect(screen.getByRole("img", { name: /Aperçu/ })).toBeInTheDocument();
+    expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
     expect(draw).toHaveBeenCalledTimes(1);
     expect(draw.mock.lastCall?.[1].size).toEqual({ platesWide: 3, platesHigh: 3 });
   });
@@ -115,7 +115,7 @@ describe("Editor import", () => {
     vi.mocked(createImageBitmap).mockRejectedValueOnce(new Error("bad"));
     await importPhoto();
     expect(screen.getByRole("alert")).toHaveTextContent("Impossible de lire cette image");
-    expect(screen.getByRole("img", { name: /Aperçu/ })).toBeInTheDocument();
+    expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
   });
 
   it("imports a dropped photo", async () => {
@@ -128,7 +128,7 @@ describe("Editor import", () => {
     await act(async () => {
       fireEvent.drop(zone, { dataTransfer: { files: [new File(["x"], "p.png")] } });
     });
-    expect(screen.getByRole("img", { name: /Aperçu/ })).toBeInTheDocument();
+    expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
   });
 
   it("ignores an empty selection", async () => {

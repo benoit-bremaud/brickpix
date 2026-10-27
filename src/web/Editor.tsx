@@ -81,7 +81,7 @@ export function Editor() {
   return (
     <>
       <label className="dropzone" data-over={over} onDragOver={(event) => { event.preventDefault(); setOver(true); }} onDragLeave={() => setOver(false)} onDrop={onDrop}>
-        Choisissez une photo ou déposez-la ici
+        <span>Choisissez une photo ou déposez-la ici</span>
         <input type="file" accept="image/*" hidden onChange={(event) => void importFile(event.target.files?.[0])} />
       </label>
       {error !== undefined && <p role="alert" className="error">{error}</p>}
@@ -90,7 +90,12 @@ export function Editor() {
         <label>Hauteur (plaques)<input type="number" min={1} max={MAX_PLATES} value={size.platesHigh} onChange={setPlates("platesHigh")} /></label>
         <label><input type="checkbox" checked={dithering} onChange={(event) => setDithering(event.target.checked)} />Tramage</label>
       </div>
-      {source !== undefined && <canvas ref={canvas} className="preview" aria-label="Aperçu de la mosaïque" role="img" />}
+      {source !== undefined && (
+        <figure className="preview-figure">
+          <figcaption>Aperçu</figcaption>
+          <canvas ref={canvas} className="preview">Aperçu de la mosaïque en tuiles rondes.</canvas>
+        </figure>
+      )}
     </>
   );
 }

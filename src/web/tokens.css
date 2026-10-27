@@ -73,3 +73,12 @@ main {
   background: var(--colour-baseplate);
   border-radius: var(--radius);
 }
+
+.preview-figure {
+  margin: 0;
+}
+
+.preview-figure figcaption {
+  margin-bottom: var(--space-2);
+  color: var(--colour-muted);
+}
