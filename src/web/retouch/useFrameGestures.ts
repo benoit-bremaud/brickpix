@@ -8,6 +8,9 @@ import { handleAt, KEY_PAN_SHARE, pan, stretch, zoomBy, ZOOM_STEP, type Handle, 
 export const LONG_PRESS_MS = 500;
 /** Distance in CSS pixels within which a press grabs a frame handle. */
 const HANDLE_REACH_PX = 24;
+/** Wheel distance of one mouse notch, and of one line when the browser counts in lines. */
+const NOTCH_PX = 100;
+const LINE_PX = 16;
 
 /** What the gestures read (latest render) and change. */
 export interface FrameTarget {
@@ -91,7 +94,7 @@ function pointerMove(session: Session, event: CanvasPointer): void {
   }
   if (drag === undefined) return;
   const delta = { x: point.x - drag.start.x, y: point.y - drag.start.y };
-  if (drag.handle === undefined) target.onFraming(pan(drag.framing, target.image, drag.size, { x: -delta.x, y: -delta.y }));
+  if (drag.handle === undefined) target.onFraming(pan(drag.framing, target.image, drag.size, delta)); // the frame follows the finger
   else target.onSize(stretch(drag.size, drag.handle, drag.crop, delta));
 }
 
@@ -143,7 +146,9 @@ function wheel(session: Session, event: WheelEvent): void {
   const target = session.target;
   if (target?.framing !== true) return;
   event.preventDefault();
-  target.onFraming(zoomBy(target.settings, event.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP));
+  // A touchpad sends many small deltas: zoom by the distance scrolled, one step per mouse notch.
+  const pixels = event.deltaY * (event.deltaMode === WheelEvent.DOM_DELTA_LINE ? LINE_PX : 1);
+  target.onFraming(zoomBy(target.settings, ZOOM_STEP ** (-pixels / NOTCH_PX)));
 }
 
 /**

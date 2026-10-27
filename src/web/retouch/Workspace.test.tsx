@@ -139,8 +139,10 @@ describe("Canvas gestures while framing", () => {
     fireEvent.keyDown(canvas, { key: "-" });
     fireEvent.keyDown(canvas, { key: "x" });
     expect(lastCrop()?.width).toBe(48);
-    fireEvent.wheel(canvas, { deltaY: -1 });
+    fireEvent.wheel(canvas, { deltaY: -100 }); // one mouse notch
     expect(lastCrop()?.width).toBe(38);
+    fireEvent.wheel(canvas, { deltaY: 4 }); // a touchpad nudge barely zooms out
+    expect(lastCrop()?.width).toBe(39);
   });
 
   it("pans by dragging and stretches the size by a handle", async () => {
@@ -150,9 +152,9 @@ describe("Canvas gestures while framing", () => {
     fireEvent.pointerDown(canvas, { pointerId: 1, clientX: 320, clientY: 240 });
     fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 300, clientY: 240 });
     fireEvent.pointerUp(canvas, { pointerId: 1 });
-    expect(lastCrop()?.x).toBe(15);
-    fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 530, clientY: 240 }); // near the right handle at x = 51
-    fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 660, clientY: 240 });
+    expect(lastCrop()?.x).toBe(11); // the frame follows the finger to the left
+    fireEvent.pointerDown(canvas, { pointerId: 2, clientX: 490, clientY: 240 }); // on the right handle, now at x = 49
+    fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 620, clientY: 240 });
     fireEvent.pointerUp(canvas, { pointerId: 2 });
     expect(screen.getByLabelText("Largeur (plaques)")).toHaveValue(4);
   });
@@ -178,7 +180,7 @@ describe("Pinch gestures", () => {
     fireEvent.pointerMove(canvas, { pointerId: 2, clientX: 400, clientY: 240 }); // frame 24 × 24 at (20, 12)
     fireEvent.pointerUp(canvas, { pointerId: 2 });
     fireEvent.pointerMove(canvas, { pointerId: 1, clientX: 180, clientY: 240 });
-    expect(lastCrop()?.x).toBe(22);
+    expect(lastCrop()?.x).toBe(18); // the frame follows the finger left by 2 pixels
   });
 });
 
