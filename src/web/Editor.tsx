@@ -78,8 +78,12 @@ function useKit(source: RgbaImage | undefined) {
     setPreparing(true);
     // Let the browser paint «Préparation du kit…» before the blocking computation (spec kit.md).
     requestAnimationFrame(() => setTimeout(() => {
-      setKit({ source: current, mosaic: computeMosaic(current, size, { dithering }) });
-      setPreparing(false);
+      // finally: a failed computation must never leave the editor frozen.
+      try {
+        setKit({ source: current, mosaic: computeMosaic(current, size, { dithering }) });
+      } finally {
+        setPreparing(false);
+      }
     }, 0));
   };
   const back = () => {
