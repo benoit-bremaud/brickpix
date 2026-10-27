@@ -10,7 +10,7 @@ export function BillTable({ bom, palette }: Props) {
   const bought = bom.tiles.reduce((sum, line) => sum + tilesToBuy(line), 0);
   return (
     // A data table keeps its columns; on a narrow screen or large text it scrolls on its own, not the page.
-    <section className="bill-scroll" aria-label="Liste des pièces" tabIndex={0}>
+    <section className="bill-scroll" aria-label="Liste des pièces">
       <table className="bill">
         <caption>Liste des pièces</caption>
         <thead>
