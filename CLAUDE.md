@@ -13,8 +13,10 @@ in `docs/architecture/`. Read them before changing anything.
 
 ## Status
 
-Bricks 1 (bootstrap) and 2 (UML study) done. Domain code: the round-tile palette
-(`src/domain/palette.ts`, spec `docs/architecture/specs/palette-round-tiles.md`). Checks: `pnpm verify`, then
+Bricks 1 (bootstrap), 2 (UML study), 3 (palette) and 4 (import, size, live preview) done. Domain code: the round-tile palette
+(`src/domain/palette.ts`, spec `docs/architecture/specs/palette-round-tiles.md`) and the
+photo-to-mosaic chain (`crop`, `resample`, `colour`, `quantise`, spec
+`docs/architecture/specs/quantise-mosaic.md`). Checks: `pnpm verify`, then
 `pnpm sonar` after push.
 
 ## Project invariants

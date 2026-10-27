@@ -1,9 +1,13 @@
-/** Placeholder shell. The editor arrives once the brick 2 UML study is validated. */
+import { Editor } from "./Editor";
+import "./tokens.css";
+
+/** Application shell: the photo-to-mosaic editor. */
 export function App() {
   return (
     <main>
       <h1>brickpix</h1>
-      <p>Transformez une photo en mosaïque LEGO. Bientôt disponible.</p>
+      <p>Transformez une photo en mosaïque LEGO. Votre photo reste dans votre navigateur.</p>
+      <Editor />
     </main>
   );
 }
