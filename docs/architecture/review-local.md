@@ -66,3 +66,33 @@
 - Tests: healthy pyramid, no over-mocking; gaps on spare→XML, blob content, dithering, fixtures.
 - Security: no injection, no egress, privacy invariant kept; headers gap outside the diff.
 - Correctness: `hidden` overridden by CSS (confirmed by QA in the browser).
+
+## Second pass — 406c96e..ffeb1e9 (after the full QA and two Codex reviews)
+
+- Checks run: design · docs · tests · correctness + security (Opus). The full QA pass was already run (`docs/architecture/qa/2026-10-27-kit-full.md`).
+- Verdict: Must 3 · Should 9 · Nice 7. All Must and Should are fixed in ffeb1e9; the Nice items are in #30.
+
+| Step | Result on ffeb1e9 |
+|---|---|
+| 1 Tests | ✅ 97 |
+| 2 Coverage | ✅ 100 % lines / 93.81 % branches · docs 100 % exported symbols |
+| 3 SonarQube | ✅ PASSED (S6845 suppressed with justification, owner decision MCDA 445) |
+| 4 Secrets | ✅ gitleaks clean |
+| 5 QA | ✅ full pass, Must PERF-01 resolved (owner decision A, 400), #29 fixed, bill overflow fixed |
+
+- 🔴 Must
+  - `specs/kit.md:91` `[docs][design]`: the «Kit trigger» row said «synchronous». **Fixed.**
+  - `qa/2026-10-27-kit-full.md:214` `[docs]`: the report claimed a focusable region. **Fixed:** the region is now focusable.
+  - `Editor.test.tsx:186` `[tests]`: paint-before-compute was not pinned. **Fixed:** frame and timeout are stepped separately.
+- 🟡 Should
+  - Spec bullet order and dithering left out of the frozen inputs; scroll region and forced colours missing from the spec. **Fixed.**
+  - `PreparingKit` notes in diagram 05. **Fixed.**
+  - `useKit` docstring. **Fixed.**
+  - Idle and reset assertions; scroll-region test. **Fixed.**
+  - WebKit keyboard access to the scroll region `[correctness]`: Tab skips the region without `tabIndex`, tested on WebKit 27.2. **Fixed** with `tabIndex={0}` + `NOSONAR`.
+- 🔵 Nice
+  - Done here: print `content-visibility: visible`, the import-during-preparation path in diagram 05, the region named by the caption.
+  - Filed in #30: the focus drop while preparing, the uncancelled pending order.
+- ⚪ Intentional
+  - Two booleans rather than a state union.
+  - rAF + `setTimeout` rather than a Web Worker, which stays in #28.
