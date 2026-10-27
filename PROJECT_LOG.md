@@ -87,3 +87,17 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   nothing. Copilot posted no review. Gate: 55 tests, 100 % of lines and 94.9 % of branches,
   docs 100 %, SonarQube passed, Gitleaks clean, QA report and screenshots in
   `docs/architecture/qa/2026-10-27-preview.md`.
+- **PR #26 merged** (`2eece77`) — feat(export): kit with build plan per plate, bill of materials
+  and BrickLink list, closes #9 (brick 5) and #29. Spec `docs/architecture/specs/kit.md`. The kit
+  recomputes the mosaic from the current inputs, shows «Préparation du kit…» first and freezes
+  the inputs (`inert`) meanwhile; the pending preview is dropped. Plates paint lazily
+  (`content-visibility: auto`, visible in print): 8×8 on a 4× slowed CPU went from 1250 ms to
+  about 600 ms, feedback in under 5 ms. Owner MCDA: busy state + lazy paint 400/500 (#28 stays
+  open for the phone budget), bill scroll region with `tabIndex={0}` + justified NOSONAR S6845
+  445/500 (WebKit does not focus scroll regions). Two local reviews and a full QA pass
+  (`docs/architecture/qa/2026-10-27-kit-full.md`). Every Must and Should of the local reviews is
+  fixed; two QA Shoulds stay open: security headers (#24) and a pending dev-dependency update.
+  Codex: 3 P2
+  findings (stale inputs, table reflow at 200 % text, pending preview), all fixed and answered
+  inline. Review threads must be resolved before the merge (branch rule). Gate: 100 tests, 100 %
+  of lines and 94 % of branches, docs 100 %, SonarQube passed, Gitleaks clean.
