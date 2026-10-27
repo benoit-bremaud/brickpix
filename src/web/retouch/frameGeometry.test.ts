@@ -19,6 +19,12 @@ describe("handleAt", () => {
   it("finds none in the middle of the frame", () => {
     expect(handleAt(crop, { x: 250, y: 150 }, 10)).toBeUndefined();
   });
+
+  it("keeps the middle of a frame smaller than twice the reach for panning", () => {
+    const small = { x: 0, y: 0, width: 40, height: 40 };
+    expect(handleAt(small, { x: 20, y: 20 }, 24)).toBeUndefined();
+    expect(handleAt(small, { x: 2, y: 2 }, 24)).toEqual({ x: -1, y: -1 });
+  });
 });
 
 describe("pan", () => {

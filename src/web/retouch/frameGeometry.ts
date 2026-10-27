@@ -20,14 +20,18 @@ export const ZOOM_STEP = 1.25;
 
 const SIDES = [-1, 0, 1] as const;
 
-/** The corner or side-middle handle of `crop` within `reach` of `point`, if any. */
+/**
+ * The corner or side-middle handle of `crop` within `reach` of `point`, if any. The reach is capped
+ * at a quarter of the shorter side, so a small frame keeps a draggable middle for panning.
+ */
 export function handleAt(crop: Rect, point: Point, reach: number): Handle | undefined {
+  const near = Math.min(reach, Math.min(crop.width, crop.height) / 4);
   for (const x of SIDES) {
     for (const y of SIDES) {
       if (x === 0 && y === 0) continue;
       const hx = crop.x + ((x + 1) / 2) * crop.width;
       const hy = crop.y + ((y + 1) / 2) * crop.height;
-      if (Math.abs(point.x - hx) <= reach && Math.abs(point.y - hy) <= reach) return { x, y };
+      if (Math.abs(point.x - hx) <= near && Math.abs(point.y - hy) <= near) return { x, y };
     }
   }
   return undefined;
