@@ -1,42 +1,13 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
+import { NEUTRAL_RETOUCH } from "../domain/retouch";
 import * as renderModule from "./canvas/renderMosaic";
-import { computeMosaic, PREVIEW_DEBOUNCE_MS } from "./Editor";
-import { stubImage } from "./test-image";
-
-const PHOTO = { width: 64, height: 48, data: new Uint8ClampedArray(64 * 48 * 4).fill(255) };
-
-function stubCanvas() {
-  const context = {
-    drawImage: vi.fn(),
-    getImageData: vi.fn(() => PHOTO),
-    beginPath: vi.fn(),
-    arc: vi.fn(),
-    fill: vi.fn(),
-    fillStyle: "",
-  };
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context as unknown as CanvasRenderingContext2D);
-  return context;
-}
-
-async function importPhoto(file = new File(["x"], "photo.png", { type: "image/png" })) {
-  const input = document.querySelector<HTMLInputElement>('input[type="file"]');
-  if (input === null) throw new Error("no file input");
-  await act(async () => {
-    fireEvent.change(input, { target: { files: [file] } });
-  });
-}
-
-function useFakeBrowser() {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    stubImage(64, 48);
-    vi.stubGlobal("createImageBitmap", vi.fn(async () => ({ width: 64, height: 48, close: vi.fn() })));
-  });
-  afterEach(() => vi.useRealTimers());
-}
+import * as photoModule from "./canvas/renderPhoto";
+import { computeMosaic } from "./chain";
+import { importPhoto, openToneMore, PHOTO, showMosaic, stubCanvas, useFakeBrowser } from "./test-editor";
+import { PREVIEW_DEBOUNCE_MS } from "./usePreview";
 
 describe("Editor preview", () => {
   useFakeBrowser();
@@ -47,14 +18,29 @@ describe("Editor preview", () => {
     expect(screen.queryByRole("figure", { name: "Aperçu" })).toBeNull();
   });
 
-  it("draws the preview at once after an import, at the default 3 × 3", async () => {
+  it("opens «Cadrer» after an import and draws the photo with its frame at once", async () => {
     stubCanvas();
-    const draw = vi.spyOn(renderModule, "renderMosaic");
+    const photo = vi.spyOn(photoModule, "renderPhoto");
+    const mosaic = vi.spyOn(renderModule, "renderMosaic");
     render(<App />);
     await importPhoto();
     expect(screen.getByRole("figure", { name: "Aperçu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Cadrer/ })).toHaveAttribute("aria-pressed", "true");
+    expect(photo).toHaveBeenCalledTimes(1);
+    expect(photo.mock.lastCall?.[3]).toBe("frame");
+    expect(photo.mock.lastCall?.[2]).toEqual({ x: 8, y: 0, width: 48, height: 48 });
+    expect(mosaic).not.toHaveBeenCalled();
+  });
+
+  it("draws the mosaic at once when «Cadrer» closes, at the default 3 × 3", async () => {
+    stubCanvas();
+    render(<App />);
+    await importPhoto();
+    const draw = vi.spyOn(renderModule, "renderMosaic");
+    showMosaic();
     expect(draw).toHaveBeenCalledTimes(1);
     expect(draw.mock.lastCall?.[1].size).toEqual({ platesWide: 3, platesHigh: 3 });
+    expect(screen.getByText(/^3 × 3 plaques · 48 × 48 tenons · 2\s?304 tuiles$/)).toBeInTheDocument();
   });
 
 });
@@ -66,29 +52,29 @@ describe("Editor debounce", () => {
     stubCanvas();
     render(<App />);
     await importPhoto();
+    openToneMore();
     const draw = vi.spyOn(renderModule, "renderMosaic");
-    const width = screen.getByLabelText("Largeur (plaques)");
-    fireEvent.change(width, { target: { value: "4" } });
+    const brightness = screen.getByLabelText(/Luminosité/);
+    fireEvent.change(brightness, { target: { value: "10" } });
     act(() => vi.advanceTimersByTime(PREVIEW_DEBOUNCE_MS - 50));
-    fireEvent.change(width, { target: { value: "5" } });
+    fireEvent.change(brightness, { target: { value: "20" } });
     act(() => vi.advanceTimersByTime(PREVIEW_DEBOUNCE_MS - 50));
     expect(draw).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(50));
     expect(draw).toHaveBeenCalledTimes(1);
-    expect(draw.mock.lastCall?.[1].size).toEqual({ platesWide: 5, platesHigh: 3 });
   });
 
-  it("refreshes the preview once, debounced, after size and dithering changes", async () => {
+  it("refreshes the preview once, debounced, after tone and dithering changes", async () => {
     stubCanvas();
     render(<App />);
     await importPhoto();
+    openToneMore();
     const draw = vi.spyOn(renderModule, "renderMosaic");
-    fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText(/Contraste/), { target: { value: "30" } });
     fireEvent.click(screen.getByLabelText("Tramage"));
     expect(draw).not.toHaveBeenCalled();
     act(() => vi.advanceTimersByTime(PREVIEW_DEBOUNCE_MS));
     expect(draw).toHaveBeenCalledTimes(1);
-    expect(draw.mock.lastCall?.[1].size).toEqual({ platesWide: 4, platesHigh: 3 });
   });
 });
 
@@ -99,8 +85,9 @@ describe("Editor debounce and kit", () => {
     stubCanvas();
     render(<App />);
     await importPhoto();
+    openToneMore();
     const draw = vi.spyOn(renderModule, "renderMosaic");
-    fireEvent.change(screen.getByLabelText("Largeur (plaques)"), { target: { value: "4" } });
+    fireEvent.change(screen.getByLabelText(/Saturation/), { target: { value: "40" } });
     fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
     act(() => vi.runAllTimers());
     expect(screen.getByRole("heading", { name: "Votre kit" })).toBeInTheDocument();
@@ -115,8 +102,10 @@ describe("Editor controls", () => {
     ["99", "8"],
     ["0", "1"],
     ["", "1"],
-  ])("clamps a plate count of %j to %s", (typed, shown) => {
+  ])("clamps a plate count of %j to %s", async (typed, shown) => {
+    stubCanvas();
     render(<App />);
+    await importPhoto();
     const height = screen.getByLabelText("Hauteur (plaques)");
     fireEvent.change(height, { target: { value: typed } });
     expect(height).toHaveValue(Number(shown));
@@ -170,7 +159,7 @@ describe("Editor import order", () => {
       .mockReturnValueOnce(new Promise<ImageBitmap>((resolve) => { releaseFirst = resolve; }))
       .mockResolvedValueOnce({ width: 64, height: 48, close: vi.fn() } as unknown as ImageBitmap);
     render(<App />);
-    const draw = vi.spyOn(renderModule, "renderMosaic");
+    const draw = vi.spyOn(photoModule, "renderPhoto");
     await importPhoto();
     await importPhoto();
     expect(draw).toHaveBeenCalledTimes(1);
@@ -275,7 +264,10 @@ describe("Editor kit dithering", () => {
       stubCanvas().getImageData.mockReturnValue(grey);
       const view = render(<App />);
       await importPhoto();
-      if (dithering) fireEvent.click(screen.getByLabelText("Tramage"));
+      if (dithering) {
+        openToneMore();
+        fireEvent.click(screen.getByLabelText("Tramage"));
+      }
       fireEvent.click(screen.getByRole("button", { name: "Commander mon kit" }));
       act(() => vi.runAllTimers());
       const rows = screen.getByRole("table").querySelectorAll("tbody tr").length;
@@ -291,7 +283,7 @@ describe("computeMosaic", () => {
   it("crops, resamples and quantises: a photo black on the left half and white on the right", () => {
     const photo = { width: 64, height: 32, data: new Uint8ClampedArray(64 * 32 * 4) };
     for (let p = 0; p < 64 * 32; p++) photo.data.set(p % 64 < 32 ? [0, 0, 0, 255] : [255, 255, 255, 255], p * 4);
-    const mosaic = computeMosaic(photo, { platesWide: 2, platesHigh: 1 }, { dithering: false });
+    const mosaic = computeMosaic(photo, { platesWide: 2, platesHigh: 1 }, NEUTRAL_RETOUCH, { dithering: false });
     expect(mosaic.cells).toHaveLength(512);
     expect(mosaic.cells[0]).toBe(3); // black
     expect(mosaic.cells[31]).toBe(0); // white
@@ -302,7 +294,7 @@ describe("renderMosaic", () => {
   it("does nothing without a 2D context", () => {
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
     const canvas = document.createElement("canvas");
-    renderModule.renderMosaic(canvas, computeMosaic(PHOTO, { platesWide: 1, platesHigh: 1 }, { dithering: false }));
+    renderModule.renderMosaic(canvas, computeMosaic(PHOTO, { platesWide: 1, platesHigh: 1 }, NEUTRAL_RETOUCH, { dithering: false }));
     expect(canvas.width).toBe(16 * renderModule.STUD_PIXELS);
   });
 });
