@@ -17,7 +17,8 @@ Bricks 1 (bootstrap), 2 (UML study), 3 (palette) and 4 (import, size, live previ
 (`src/domain/palette.ts`, spec `docs/architecture/specs/palette-round-tiles.md`) and the
 photo-to-mosaic chain (`crop`, `resample`, `colour`, `quantise`, spec
 `docs/architecture/specs/quantise-mosaic.md`). Checks: `pnpm verify`, then
-`pnpm sonar` after push.
+`pnpm sonar` after push. Production: <https://brickpix.benoitbremaud.fr> (deployment diagram
+`docs/architecture/diagrams/deployment/`).
 
 ## Project invariants
 
@@ -28,6 +29,7 @@ photo-to-mosaic chain (`crop`, `resample`, `colour`, `quantise`, spec
   image content.
 - **Conception is the source of truth**: code follows `docs/architecture/`. When they diverge, fix
   the code or update the diagram in the same change.
+- **Visibility**: the repo stays public, also in production (owner exception, 2026-10-28, #11).
 - **No default exports**, no `any`, design tokens for every colour and spacing in the UI.
 
 ## Where things live

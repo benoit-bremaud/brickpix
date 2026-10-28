@@ -8,6 +8,10 @@
     // The future editor may use client-side routes; unknown paths fall back to index.html.
     "not_found_handling": "single-page-application"
   },
+  // Production lives on the custom domain only; Cloudflare manages its DNS record and certificate.
+  "routes": [{ "pattern": "brickpix.benoitbremaud.fr", "custom_domain": true }],
+  "workers_dev": false,
   // Every uploaded version gets its own URL: that is the pull-request preview (= staging).
+  // Set explicitly: left out, it would follow `workers_dev` and turn previews off.
   "preview_urls": true
 }

@@ -1,8 +1,10 @@
 name: deploy
 
-# Cloudflare Workers static assets (wrangler.jsonc): production on main, a stable preview alias
-# per pull request (= staging). Needs the repository secrets CLOUDFLARE_API_TOKEN (Workers Scripts
-# edit, this account only, with an expiry) and CLOUDFLARE_ACCOUNT_ID. The Worker must already exist
+# Cloudflare Workers static assets (wrangler.jsonc): production on main at
+# https://brickpix.benoitbremaud.fr, a stable preview alias per pull request (= staging). Needs the
+# repository secrets CLOUDFLARE_API_TOKEN (Workers Scripts edit; Zone read and Workers Routes edit
+# on benoitbremaud.fr for the custom domain; this account only, with an expiry) and
+# CLOUDFLARE_ACCOUNT_ID. The Worker must already exist
 # (first created by hand on 2026-10-23); `versions upload` cannot create it.
 
 on:

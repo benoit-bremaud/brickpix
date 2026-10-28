@@ -12,4 +12,7 @@ types (`NN-<type>.md`, Mermaid). Use cases validated by the owner on 2026-10-23 
 | 05 | state | The editor's states (empty, editing, kit ready) |
 | 06 | data-flow | Pixels in, tiles and lists out |
 
+Deployment (Cloudflare Worker, custom domain `brickpix.benoitbremaud.fr`, pull-request previews):
+[`diagrams/deployment/01-deployment.md`](diagrams/deployment/01-deployment.md), validated on 2026-10-28.
+
 Decisions will be recorded as MADR files under `decisions/` once the first one is taken in a study.

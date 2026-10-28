@@ -6,11 +6,13 @@ per plate and the list of parts to buy.
 
 Everything runs in the browser. No photo ever leaves your machine.
 
+Live at <https://brickpix.benoitbremaud.fr>.
+
 ## Status
 
-Brick 1 (bootstrap) done: tooling, security CI, documentation skeleton, Cloudflare Workers deploy.
-No image logic yet: brick 2 is the UML conception, see [docs/product/vision.md](docs/product/vision.md)
-and [docs/architecture/README.md](docs/architecture/README.md).
+V1 in progress: import, size, live preview, retouch and the kit (build plan, bill of materials) work
+end to end. Product intent in [docs/product/vision.md](docs/product/vision.md), conception in
+[docs/architecture/README.md](docs/architecture/README.md).
 
 ## Planned (V1)
 
@@ -35,6 +37,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, gates and the release flow.
 
 ## Licence
 
-Public for transparency until the first production deploy, then private. No licence is granted:
+Public for transparency, also in production (owner decision, 2026-10-28). No licence is granted:
 all rights reserved. LEGO® is a trademark of the LEGO Group, which does not sponsor, authorise or
 endorse this project.
