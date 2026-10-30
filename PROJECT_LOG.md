@@ -147,3 +147,16 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   - history: earlier log entries and dated QA notes stay as written (430/500).
   - Gate: 156 tests, 98.9 % of statements covered, SonarQube passed, Gitleaks clean, QA smoke on
     the tagline. Codex found no issue.
+
+## 2026-10-30 — README status
+
+- **PR #50 merged** (`8fd7463`): docs(readme), update the status section to the delivered
+  features, closes #49. The Status section lists the V1 features of bricks 1–6; «Planned (V1)»
+  becomes «Next» with the open backlog #11–#14 (owner MCDA 450/500, against deleting the section
+  420 and striking items through 200). Needed by benoitbremaud.fr PR #142, whose evidence file
+  checks the README on `8fd7463`.
+  - Gate: `pnpm verify` green, Gitleaks clean, SonarQube passed. **Waiver** (owner): Codex hit its
+    usage limit, no review.
+  - Gotcha: `pnpm sonar` returned 401 because the agent shell does not source `~/.zshrc`, so
+    `SONAR_TOKEN` was unset; reading it from `~/.config/sonarqube/analysis-token` fixed it. The
+    `sonarqube` status is a required check with no admin bypass.
