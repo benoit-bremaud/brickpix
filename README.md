@@ -8,18 +8,20 @@ Everything runs in the browser. No photo ever leaves your machine.
 
 ## Status
 
-Brick 1 (bootstrap) done: tooling, security CI, documentation skeleton, Cloudflare Workers deploy.
-No image logic yet: brick 2 is the UML conception, see [docs/product/vision.md](docs/product/vision.md)
-and [docs/architecture/README.md](docs/architecture/README.md).
+V1 features delivered (bricks 1–6), all in the browser:
 
-## Planned (V1)
+- Import a photo; it never leaves your machine.
+- Retouch before quantisation: crop, zoom, rotate, mirror, brightness, contrast, saturation,
+  sharpen, moods, background simplification.
+- Live preview quantised to 17 colours of 1×1 round tiles, by perceptual distance (CIEDE2000),
+  with optional Floyd–Steinberg dithering.
+- Mosaic size in multiples of 16×16 plates, up to 8 plates per side.
+- The kit: build plan per plate, bill of materials with a spare rate, BrickLink wanted list (XML).
+- Printable kit and keyboard-accessible controls.
 
-- Retouch before quantisation: crop, brightness, contrast, saturation, sharpen,
-  background simplification.
-- Quantisation to the real palette of 1×1 round tiles, perceptual colour distance, optional
-  dithering, live preview.
-- Any mosaic size in multiples of 16×16 plates, from 16×16 (one plate; 48×48 is the common art-mosaic size) up to giant pieces.
-- "Aperçu" then "Commander mon kit": build plan per plate, bill of materials, BrickLink wanted list.
+## Next
+
+- Custom domain (#11), supplier study (#12), cost estimate (#13), optional frame (#14).
 
 ## Development
 
