@@ -109,7 +109,7 @@ release() { # release <tag>: the checks 1–4 of agents-skills ADR-0004 before a
   git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$tmp/signers" verify-tag "refs/tags/$1" > /dev/null 2>&1 \
     || die "tag $1 is not signed by a key of the trust store"
   # a signed tag object re-pushed under another name would still verify: the name inside must match
-  [ "$(git cat-file tag "refs/tags/$1" | sed -n 's/^tag //p')" = "$1" ] || die "tag $1 was signed under another name"
+  [ "$(git cat-file tag "refs/tags/$1" | sed -n '/^$/q; s/^tag //p')" = "$1" ] || die "tag $1 was signed under another name"
   sha=$(git rev-parse "refs/tags/$1^{commit}")
   verify gate "$sha" >&2
   verify deploy/staging "$sha" >&2

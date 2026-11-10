@@ -4,7 +4,7 @@ Local pre-push review of the local CI migration (#53, ADR-0001). It lists the re
 the six dimensions and what was fixed before the push.
 
 - Date: 2026-11-10
-- Commit: 1739d10 (reviewed), with the fixes in the next commit of the branch
+- Commit: 1739d10 (reviewed), fixes in b06b928 and the following commit
 - Scope: branch diff `main...HEAD` (35 files: workflows removed, `prod.yml`, `justfile`,
   `lefthook.yml`, `mise.toml`, `scripts/`, ADR-0001, docs)
 - Checks run: adversarial (Opus, 2 rounds) · design · docs · tests · security · correctness
@@ -13,7 +13,8 @@ the six dimensions and what was fixed before the push.
 ## Adversarial review (#236)
 
 - Round 1 on `1739d10`: Must 2 · Should 9 · Nice 9 · unverified 2 · Push gate: closed
-- Round 2 on the fix commit: see the line below, filled by § 3b
+- Round 2 on `b06b928`: 14 fixed · 2 not fixed (accepted, filed) · 1 regressed · new Must 1 (lockfile not regenerated after the override change, every frozen install failed) · Push gate: closed
+- Round 3 on the second fix commit (lockfile regenerated, `pnpm install --frozen-lockfile --lockfile-only` guard in `just lint`, wiring assertion restored, tag header parse): filled below
 - Optional second review (owner's OpenAI account): ChatGPT/Codex not run (never a gate step)
 
 ## Pre-merge gate (head SHA 1739d10, `--push` mode)
