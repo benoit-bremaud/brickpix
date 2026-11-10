@@ -9,8 +9,9 @@
 #               before every merge                     then the attestation
 #   L3 nightly  systemd user timer                     check + TruffleHog + toolchain drift
 #
-# Then: `just merge <pr>` (refuses without the gate attestation on the head SHA),
-# `just deploy staging` from attested main, `just attest staging` after the QA pass,
+# Then: `just merge <pr>` (refuses without the gate attestation on the head SHA), `just gate` again
+# on main (the squash commit is unattested), `just deploy staging`, `just attest staging` after
+# the QA pass,
 # `git tag -s vX.Y.Z` → prod.yml (fallback: `just deploy prod <tag>`).
 
 set shell := ["sh", "-eu", "-c"]
@@ -45,7 +46,7 @@ lint: node-guard
     zizmor --quiet .github/workflows
 
 # Vitest with the coverage floor of vite.config.ts (80 %), doc coverage >= 90 %, the local CI wiring
-# tests, then the production build (the same `pnpm verify` the former ci.yml ran, in four steps)
+# tests, then the production build
 test: node-guard
     pnpm test:coverage
     sh scripts/doc-coverage.sh
@@ -81,8 +82,8 @@ gate base="origin/main":
     [ -z "$(git status --porcelain)" ] || { echo "gate: commit or set aside local changes first" >&2; exit 1; }
     case "$base" in origin/*) git fetch --quiet origin "${base#origin/}" ;; esac
     git merge-base --is-ancestor "$base" HEAD || { echo "gate: HEAD is behind $base, merge or rebase it first" >&2; exit 1; }
-    # The gate runs the branch's own recipes and scripts with the owner's keys and tokens: a branch
-    # that changes them is gated only after a human read those files (GATE_CI_CHANGE=1).
+    # Reminder, not a control (this justfile is the branch's own): read a branch's CI changes before
+    # gating it with the owner's keys and tokens, then GATE_CI_CHANGE=1 just gate.
     ci=$(git diff --name-only "$base...HEAD" -- justfile lefthook.yml mise.toml mise.lock .nvmrc scripts .github package.json pnpm-lock.yaml vite.config.ts eslint.config.js sonar-project.properties wrangler.jsonc 'tsconfig*.json')
     [ -z "$ci" ] || [ "${GATE_CI_CHANGE:-0}" = 1 ] || { echo "gate: this branch changes the local CI itself ($(printf '%s' "$ci" | tr '\n' ' ')): read those files, then run GATE_CI_CHANGE=1 just gate" >&2; exit 1; }
     [ -n "$(git branch -r --contains HEAD)" ] || { echo "gate: push HEAD first (the attestation is written on the pushed head)" >&2; exit 1; }
@@ -124,7 +125,7 @@ smoke: node-guard
     sh scripts/smoke.sh
 
 # Rehearse a workflow with act (L2, needs docker): dry run of the whole graph, then for the prod
-# workflow (ADR-0004) a real run of its `classify` job on fake tag events. The deploy job never
+# workflow (agents-skills ADR-0004) a real run of its `classify` job on fake tag events. The deploy job never
 # runs and act gets no secret. The tag prefix is read from the workflow's PREFIX.
 rehearse workflow:
     #!/bin/sh
@@ -162,11 +163,11 @@ merge pr:
 
 # Deploy what was attested, from a clean tree (skill environments, branching model A). staging:
 # up-to-date main after a green gate, as the Worker version alias `staging`
-# (staging-brickpix.<subdomain>.workers.dev). prod: fallback when Actions cannot run (ADR-0004):
+# (staging-brickpix.<subdomain>.workers.dev). prod: fallback when Actions cannot run (agents-skills ADR-0004):
 # classify, verify-tag, peel, status + notes (attest.sh release), deployed from the tag's commit,
 # then back to the branch; log it in PROJECT_LOG.md. Needs the Cloudflare token in the environment
 # (CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID) or a `wrangler login`.
-deploy env tag="":
+deploy env tag="": node-guard
     #!/bin/sh
     set -eu
     env={{quote(env)}} tag={{quote(tag)}}
@@ -177,6 +178,7 @@ deploy env tag="":
         [ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] \
           || { echo "deploy: staging deploys from up-to-date main only" >&2; exit 1; }
         sh scripts/attest.sh verify gate HEAD
+        pnpm install --frozen-lockfile
         pnpm exec vite build
         pnpm exec wrangler versions upload --preview-alias staging --message "staging $(git rev-parse --short HEAD)"
         ;;
@@ -199,7 +201,7 @@ deploy env tag="":
       *) echo "deploy: unknown environment $env (staging, prod)" >&2; exit 1 ;;
     esac
 
-# Record the staging QA pass on the deployed main commit — run only after it succeeded (ADR-0004)
+# Record the staging QA pass on the deployed main commit — run only after it succeeded (agents-skills ADR-0004)
 attest env:
     #!/bin/sh
     set -eu

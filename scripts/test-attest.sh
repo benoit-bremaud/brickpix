@@ -84,6 +84,11 @@ git add b && git commit -qm second
 run 1 "unpushed HEAD refused" "is not pushed" sh scripts/attest.sh write gate
 git push -q origin main
 second=$(git rev-parse HEAD)
+# write gate <commit> (the gate captures HEAD before its checks): an empty capture, an unknown commit
+# and a HEAD that moved since are all refused.
+run 1 "empty captured commit refused" "empty commit argument" sh scripts/attest.sh write gate ""
+run 1 "unknown captured commit refused" "unknown commit" sh scripts/attest.sh write gate deadbeef
+run 1 "moved HEAD refused" "checks ran on" sh scripts/attest.sh write gate "$first"
 
 # Forgeries: a note signed by a key outside the trust store (even one the checkout trusts), a
 # note copied to another commit.
@@ -118,6 +123,9 @@ git -c user.signingkey="$work/other.pub" tag -s -m foreign v1.3.0 "$first"
 run 1 "tag signed by a foreign key refused" "not signed by a key of the trust store" sh scripts/attest.sh release v1.3.0
 run 1 "two-component tag refused" "not a stable release tag" sh scripts/attest.sh release v1.0
 run 1 "option-shaped tag refused" "not a stable release tag" sh scripts/attest.sh release -v1.0.0
+run 1 "prefixed tag refused" "not a stable release tag" sh scripts/attest.sh release brickpix-v1.0.0
+git update-ref refs/tags/v9.9.9 refs/tags/v1.0.0
+run 1 "signed tag object replayed under another name refused" "signed under another name" sh scripts/attest.sh release v9.9.9
 git tag -s -m v2.0.0 v2.0.0 "$second"
 run 1 "tag on a commit with a moved note refused" "names another commit" sh scripts/attest.sh release v2.0.0
 echo c > c && git add c && git commit -qm third && git push -q origin main
@@ -125,5 +133,30 @@ run 0 "third commit gated" "gate recorded" sh scripts/attest.sh write gate
 git tag -s -m v3.0.0 v3.0.0 HEAD
 run 1 "tag without the staging QA note refused" "no deploy/staging note" sh scripts/attest.sh release v3.0.0
 
+# Concurrent push (agents-skills #372): a pre-push hook makes the clone push its gate note between
+# our fetch and our push, once; write refetches, re-adds its note on top and retries, keeping the
+# clone's note.
+cd "$work/clone" && git pull -q origin main && git commit -q --allow-empty -m other && git push -q origin main
+other=$(git rev-parse HEAD)
+cd "$repo" && git pull -q origin main && git commit -q --allow-empty -m mine && git push -q origin main
+mine=$(git rev-parse HEAD)
+cat > .git/hooks/pre-push <<EOF
+#!/bin/sh
+grep -q refs/notes/gate || exit 0
+[ -e "$work/raced" ] && exit 0
+touch "$work/raced"
+unset \$(git rev-parse --local-env-vars)
+cd "$work/clone" && sh scripts/attest.sh write gate "$other" > /dev/null
+EOF
+chmod +x .git/hooks/pre-push
+run 0 "gate written after a concurrent push" "retrying" sh scripts/attest.sh write gate "$mine"
+rm .git/hooks/pre-push
+[ -e "$work/raced" ] || fail "the concurrent push did not happen"; n=$((n + 1))
+run 0 "own note kept" "gate verified on $mine" sh scripts/attest.sh verify gate "$mine"
+run 0 "concurrent note kept" "gate verified on $other" sh scripts/attest.sh verify gate "$other"
+printf '#!/bin/sh\necho refused by hook >&2\nexit 1\n' > .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+run 1 "other push failure not retried" "could not record the gate note" sh scripts/attest.sh write gate "$mine"
+grep -q retrying "$work/out" && fail "a refused push was retried"; n=$((n + 1))
+rm .git/hooks/pre-push
 
 echo "test-attest: $n cases passed"

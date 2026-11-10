@@ -70,12 +70,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           package-manager-cache: false # a release build never reads a cache another run could poison
+      - name: Build
+        # the same commands as just deploy prod <tag>; no secret in the env of the dependency and
+        # build scripts
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm exec vite build
       - name: Deploy production
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        # the same commands as just deploy prod <tag>
-        run: |
-          pnpm install --frozen-lockfile
-          pnpm exec vite build
-          pnpm exec wrangler deploy
+        run: pnpm exec wrangler deploy

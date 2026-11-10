@@ -23,6 +23,8 @@ unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_OBJECT_DIRECTORY GIT_C
 # The gate of a branch that changes the local CI runs with GATE_CI_CHANGE=1; the guard cases
 # below must not inherit it.
 unset GATE_CI_CHANGE
+# A developer shell may export the SonarQube token or host: the sonar cases below set their own.
+unset SONAR_TOKEN SONAR_HOST_URL
 # The throwaway repositories must not inherit the machine's signing, hooks or URL rewrites.
 export GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null
 
@@ -49,7 +51,19 @@ deps() { just --show "$1" | grep -E "^$1( |:)" | sed 's/.*: *//'; } # deps <reci
 [ "$(deps check)" = "lint test security secrets" ] || fail "check must be exactly lint test security secrets"; ok
 deps nightly | grep -qw check || fail "nightly does not depend on check"; ok
 just --show smoke | grep -q 'scripts/smoke.sh' || fail "smoke does not run scripts/smoke.sh"; ok
-just --show test | grep -q 'scripts/doc-coverage.sh' || fail "test does not measure the doc coverage"; ok
+# doc-coverage.sh behaviour, in a throwaway repository: the 90 % floor, the companion `type` and
+# re-export lines not counted, a file at the src/ root seen, no export at all refused.
+dc="$work/dc"; mkdir -p "$dc/src/domain" && git -C "$dc" init -q
+printf '/** a */\nexport const a = 1\nexport type A = (typeof a)[keyof typeof a]\nexport { a as b }\n' > "$dc/src/domain/a.ts"
+i=0; while [ "$i" -lt 8 ]; do printf '/** d%s */\nexport const d%s = %s\n' "$i" "$i" "$i" >> "$dc/src/root.ts"; i=$((i + 1)); done
+echo 'export const bare = 0' >> "$dc/src/root.ts"
+git -C "$dc" add src
+out=$(cd "$dc" && sh "$root/scripts/doc-coverage.sh") || fail "doc-coverage: 9/10 documented must pass: $out"
+[ "$out" = "doc coverage: 9/10 exports documented (90.0 %, floor 90)" ] || fail "doc-coverage: unexpected count: $out"; ok
+echo 'export const bare2 = 0' >> "$dc/src/root.ts" && git -C "$dc" add src
+out=$(cd "$dc" && sh "$root/scripts/doc-coverage.sh") && fail "doc-coverage: 9/11 documented must fail"
+printf '%s' "$out" | grep -q '9/11 exports documented (81.8 %' || fail "doc-coverage: unexpected count: $out"; ok
+git -C "$dc" rm -q --cached -r src && (cd "$dc" && sh "$root/scripts/doc-coverage.sh" > /dev/null 2>&1) && fail "doc-coverage: no export must fail"; ok
 just --show security | grep -q 'pnpm audit --audit-level moderate' || fail "security does not keep the moderate threshold of the former dependency-review"; ok
 # The one workflow left: prod.yml, on v* tags only, no other trigger, no write permission at the top.
 [ "$(find .github -path '*/workflows/*' -name '*.y*ml' | sort | tr '\n' ' ')" = ".github/workflows/prod.yml " ] || fail "prod.yml must be the only workflow (ADR-0001)"; ok

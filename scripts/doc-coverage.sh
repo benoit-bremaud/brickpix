@@ -3,7 +3,7 @@
 # 2026-10-16; step of `just test`). Companion `type X = (typeof X)[keyof typeof X]` lines and
 # re-exports are not counted: the const's doc is theirs. Tests and test wiring are not counted.
 set -eu
-git ls-files 'src/**/*.ts' 'src/**/*.tsx' | grep -vE '\.test\.tsx?$|/test-[a-z]+\.ts$' | xargs awk '
+git ls-files ':(glob)src/**/*.ts' ':(glob)src/**/*.tsx' | grep -vE '\.test\.tsx?$|/test-[a-z]+\.ts$' | xargs awk '
   FNR == 1 { prev = "" }
   /^export (type [A-Za-z]+ = \(typeof|\{)/ { next }
   /^export / { total++; if (prev !~ /\*\/[[:space:]]*$/) missing++ }

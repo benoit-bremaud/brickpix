@@ -84,8 +84,10 @@ the hooks. Dependabot stays, for npm and for the one workflow left.
   closed by a pnpm override to the patched major.
 - The pipx backend of mise pins the Semgrep version, not its Python dependencies (resolved at
   install time): accepted gap.
-- Bootstrap: this change edits the gate itself, so its gate ran with `GATE_CI_CHANGE=1` after a
-  human read of the files, and it was merged with `gh pr merge --squash` under the owner's waiver
-  (`.github/allowed_signers` was not on `main` yet, so `just merge` could not verify the note).
+- Bootstrap: this change edits the gate itself, so its gate is run with `GATE_CI_CHANGE=1` after a
+  human read of the files, and it is merged with `gh pr merge --squash` under the owner's waiver
+  (`.github/allowed_signers` is not on `main` before it, so `just merge` cannot verify the note).
   Every later merge goes through `just merge <pr>`.
+- A squash merge creates a `main` commit with no attestation: after every merge, `just gate` runs
+  again on up-to-date `main` before `just deploy staging` (skill `local-ci` § Attestation).
 - Lefthook needs the hooks installed once per clone: `just setup`.

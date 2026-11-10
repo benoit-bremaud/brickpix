@@ -14,6 +14,7 @@ trap 'kill "$pid" 2>/dev/null || true' EXIT
 url="http://127.0.0.1:$port"
 i=0
 until curl -sf -o /dev/null "$url/"; do
+  kill -0 "$pid" 2>/dev/null || { echo "smoke: vite preview exited (port $port busy?)" >&2; exit 1; }
   i=$((i + 1)); [ "$i" -lt 50 ] || { echo "smoke: $url did not answer within 5 s" >&2; exit 1; }
   sleep 0.1
 done
@@ -21,5 +22,6 @@ page=$(curl -sf "$url/")
 printf '%s' "$page" | grep -q '<title>brickpix' || { echo "smoke: the page has no brickpix title" >&2; exit 1; }
 js=$(printf '%s' "$page" | sed -n 's/.*<script[^>]*src="\([^"]*\.js\)".*/\1/p' | head -n 1)
 [ -n "$js" ] || { echo "smoke: the page references no JavaScript bundle" >&2; exit 1; }
+case "$js" in /*) ;; *) js="/${js#./}" ;; esac # a relative base in vite.config.ts
 curl -sf -o /dev/null "$url$js" || { echo "smoke: bundle $js is not served" >&2; exit 1; }
 echo "smoke: $url serves the production build ($js)"

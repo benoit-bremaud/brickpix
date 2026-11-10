@@ -20,7 +20,7 @@
 # origin/main, never from the checkout, so a branch cannot trust its own key; the same file
 # verifies release tags. Notes are fetched before use (an absent remote ref means nothing was
 # attested yet) and pushed fast-forward; when another session moved the ref meanwhile, it is
-# refetched, the note re-added and the push retried (#372). Needs git, ssh-keygen, gh.
+# refetched, the note re-added and the push retried (agents-skills #372). Needs git, ssh-keygen, gh.
 set -eu
 
 die() { echo "attest: $*" >&2; exit 1; }
@@ -55,12 +55,12 @@ write() { # write <kind> [expected commit]
   git fetch --quiet origin
   [ -n "$(git branch -r --contains "$sha")" ] || die "$sha is not pushed: push it, then run the gate again"
   key=$(git config user.signingkey) || die "no user.signingkey: configure SSH signing (skill local-ci § Attestation)"
-  [ "$(git config gpg.format)" = ssh ] || die "gpg.format is not ssh: only SSH signing is supported (#213)"
+  [ "$(git config gpg.format)" = ssh ] || die "gpg.format is not ssh: only SSH signing is supported (agents-skills #213)"
   r=$(repo)
   printf '%s %s %s\n' "$1" "$r" "$sha" > "$tmp/payload"
   ssh-keygen -q -Y sign -n local-ci -f "$key" "$tmp/payload" > /dev/null 2>&1 \
     || die "ssh-keygen could not sign with $key (is its private key in ssh-agent?)"
-  tries=0 # another session may push $ref between our fetch and push: refetch, re-add, retry (#372)
+  tries=0 # another session may push $ref between our fetch and push: refetch, re-add, retry (agents-skills #372)
   until : > "$tmp/push" && fetch_notes "$ref" \
     && cat "$tmp/payload" "$tmp/payload.sig" | git notes --ref "$ref" add -f -F - "$sha" \
     && git push --quiet origin "$ref" 2> "$tmp/push"; do
@@ -102,13 +102,15 @@ verify() { # verify <kind> <commit>
   echo "attest: $1 verified on $sha ($who)"
 }
 
-release() { # release <tag>: the checks 1–4 of ADR-0004 before a production deploy
+release() { # release <tag>: the checks 1–4 of agents-skills ADR-0004 before a production deploy
   semver='(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'
-  echo "$1" | grep -Eq "^([^-].*-)?v$semver\$" || die "$1 is not a stable release tag: only vX.Y.Z reaches production"
+  echo "$1" | grep -Eq "^v$semver\$" || die "$1 is not a stable release tag: only vX.Y.Z reaches production"
   signers
-  git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$tmp/signers" verify-tag "$1" > /dev/null 2>&1 \
+  git -c gpg.format=ssh -c gpg.ssh.allowedSignersFile="$tmp/signers" verify-tag "refs/tags/$1" > /dev/null 2>&1 \
     || die "tag $1 is not signed by a key of the trust store"
-  sha=$(git rev-parse "$1^{commit}")
+  # a signed tag object re-pushed under another name would still verify: the name inside must match
+  [ "$(git cat-file tag "refs/tags/$1" | sed -n 's/^tag //p')" = "$1" ] || die "tag $1 was signed under another name"
+  sha=$(git rev-parse "refs/tags/$1^{commit}")
   verify gate "$sha" >&2
   verify deploy/staging "$sha" >&2
   echo "$sha"

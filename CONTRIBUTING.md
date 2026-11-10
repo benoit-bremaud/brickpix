@@ -30,7 +30,7 @@ Every issue and pull request carries one label of each family:
 ## Gates
 
 Local CI (ADR-0001, skill `local-ci`): four tiers, one `just` recipe each, no GitHub workflow runs
-on a pull request. Once per clone: `mise trust && just setup` (pinned toolchain of `mise.toml`,
+on a pull request. Once per clone: `mise trust && mise x -- just setup` (pinned toolchain of `mise.toml`,
 dependencies, git hooks).
 
 | Tier | Recipe | When | Holds |
@@ -61,9 +61,10 @@ needs `GATE_CI_CHANGE=1` after a human read), every review comment answered inli
 
 ## Environments and deployment
 
-Branching model A (ADR-0001): a single `main`, no staging branch. `local` is `pnpm dev`;
+Branching model A (agents-skills ADR-0004, applied by ADR-0001): a single `main`, no staging branch. `local` is `pnpm dev`;
 `staging` is the Worker version alias `staging` (`staging-brickpix.<subdomain>.workers.dev`),
-deployed by `just deploy staging` from an up-to-date, attested `main`, then attested after a
+deployed by `just deploy staging` from an up-to-date, attested `main` (a squash merge creates an
+unattested commit: `git checkout main && git pull && just gate` first), then attested after a
 successful QA pass by `just attest staging`; `prod` is the Worker deployed by the only GitHub
 workflow, `prod.yml`, when a signed stable tag `vX.Y.Z` is pushed: it verifies the tag against
 `.github/allowed_signers`, the `gate` status and the staging note with `scripts/attest.sh release`,

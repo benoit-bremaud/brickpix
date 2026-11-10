@@ -29,7 +29,7 @@ Needs [mise](https://mise.jdx.dev/) (it installs the pinned Node 22, pnpm and th
 `mise.toml`) and `sonar-scanner` for the merge gate.
 
 ```bash
-mise trust && just setup   # toolchain, dependencies, git hooks (once per clone)
+mise trust && mise x -- just setup   # toolchain, dependencies, git hooks (once per clone)
 pnpm dev                   # local dev server
 just check                 # lint, typecheck, tests with coverage, build, SAST, audit, secrets
 ```

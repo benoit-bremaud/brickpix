@@ -3,7 +3,8 @@
 Release tags are immutable once published (skill `release-tag` § Protection): nobody creates,
 moves or deletes a `v*` tag outside the owner's release procedure, and `prod.yml` (ADR-0001) only
 ever sees a tag the owner signed. This file documents the ruleset to apply and the exact commands;
-the configuration itself lives on GitHub, not in the repository.
+the configuration itself lives on GitHub (repository ruleset `release tags`, id `26949817`, created
+2026-11-10), not in the repository.
 
 ## Policy
 
@@ -64,7 +65,7 @@ Expected:
 ## Remove (emergency only)
 
 ```bash
-gh api repos/benoit-bremaud/brickpix/rulesets/<id> --method PATCH -f enforcement=disabled
+gh api repos/benoit-bremaud/brickpix/rulesets/26949817 --method PATCH -f enforcement=disabled
 ```
 
 Re-enable immediately after the emergency; log the reason in `PROJECT_LOG.md`.
