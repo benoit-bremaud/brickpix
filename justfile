@@ -36,8 +36,8 @@ node-guard:
     @node -e 'const want=require("fs").readFileSync(".nvmrc","utf8").trim().split(".")[0]; const v=process.versions.node; if (v.split(".")[0] !== want) { console.error("Node " + v + " found, Node " + want + " required (.nvmrc). Run: mise x -- just <recipe>"); process.exit(1) }'
 
 # lockfile in step with package.json (a frozen install would fail), eslint (with the domain purity
-# rule), tsc (app and domain projects), the shell scripts, the hooks,
-# the one workflow left (actionlint syntax, zizmor security audit)
+# rule), tsc (app and domain projects), the shell scripts, the hooks, the one workflow left
+# (actionlint syntax, zizmor security audit)
 lint: node-guard
     pnpm install --frozen-lockfile --lockfile-only --ignore-scripts
     pnpm lint

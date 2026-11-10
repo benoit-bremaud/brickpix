@@ -4,30 +4,31 @@ Local pre-push review of the local CI migration (#53, ADR-0001). It lists the re
 the six dimensions and what was fixed before the push.
 
 - Date: 2026-11-10
-- Commit: 1739d10 (reviewed), fixes in b06b928 and the following commit
+- Commit: 1739d10 (reviewed), fixes in b06b928, f9261a0 and the report commit
 - Scope: branch diff `main...HEAD` (35 files: workflows removed, `prod.yml`, `justfile`,
   `lefthook.yml`, `mise.toml`, `scripts/`, ADR-0001, docs)
-- Checks run: adversarial (Opus, 2 rounds) · design · docs · tests · security · correctness
-- Verdict: fix Must Have first (done) · Must 5 · Should 13 · Nice 11
+- Checks run: adversarial (Opus, 4 rounds) · design · docs · tests · security · correctness
+- Verdict: ship after the fixes (push gate open at round 3) · Must 5 + 1 (round 2) · Should 13 + 1 · Nice 11 + 2, all fixed or filed (#54, agents-skills#398)
 
 ## Adversarial review (#236)
 
 - Round 1 on `1739d10`: Must 2 · Should 9 · Nice 9 · unverified 2 · Push gate: closed
 - Round 2 on `b06b928`: 14 fixed · 2 not fixed (accepted, filed) · 1 regressed · new Must 1 (lockfile not regenerated after the override change, every frozen install failed) · Push gate: closed
-- Round 3 on the second fix commit (lockfile regenerated, `pnpm install --frozen-lockfile --lockfile-only` guard in `just lint`, wiring assertion restored, tag header parse): filled below
+- Round 3 on `f9261a0`: 3 fixed · 0 not fixed · 0 regressed · new Must 0 · **Push gate: open** (one Nice folded into the report commit a82477f: comment rewrap, `lint` lockfile wiring assertion, 107 cases)
+- Round 4 on `a82477f` (report + round-3 Nice): 2 fixed · new Must 0 · **Push gate: open**
 - Optional second review (owner's OpenAI account): ChatGPT/Codex not run (never a gate step)
 
-## Pre-merge gate (head SHA 1739d10, `--push` mode)
+## Pre-merge gate (checked on 1739d10, b06b928, f9261a0 and a82477f, `--push` mode)
 
 | Step | Result |
 |---|---|
 | 0 CI mirror | n/a — no workflow triggered on `pull_request` (only `prod.yml`, on `v*` tags) |
-| 1 Tests | ✅ 156 unit/integration (13 files) · ✅ 103 → 105 local CI wiring cases · ✅ 28 → 39 attestation cases |
+| 1 Tests | ✅ 156 unit/integration (13 files) · ✅ 103 → 107 local CI wiring cases · ✅ 28 → 39 attestation cases |
 | 2 Coverage | tests 98.91 % stmts / 88.53 % branches / 100 % funcs / 100 % lines (floor 80) · docs 94/94 exports, 100 % (floor 90) |
 | 3 SonarQube | ✅ PASSED (`just sonar`, project `brickpix`, run now as a cheap scan) |
 | 4 Secrets | ✅ gitleaks clean (`main..HEAD` and full history in `just secrets`) · no tracked .env · diff read: a public key and a noreply address only |
 | 5 E2E/smoke | ✅ `just smoke` serves the production build · ⏸ QA pass on staging after the merge |
-- Gate: **pre-push green** — `mise x -- just check` passed on 1739d10 and on the fix commit; the
+- Gate: **pre-push green** — `mise x -- just check` passed on 1739d10, b06b928 and f9261a0; the
   attestation (`just gate`) is deferred to the pushed head (never GREEN here).
 
 ## 🔴 Must Have

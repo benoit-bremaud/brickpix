@@ -52,6 +52,7 @@ deps() { just --show "$1" | grep -E "^$1( |:)" | sed 's/.*: *//'; } # deps <reci
 deps nightly | grep -qw check || fail "nightly does not depend on check"; ok
 just --show smoke | grep -q 'scripts/smoke.sh' || fail "smoke does not run scripts/smoke.sh"; ok
 just --show test | grep -q 'scripts/doc-coverage.sh' || fail "test does not measure the doc coverage"; ok
+just --show lint | grep -q 'pnpm install --frozen-lockfile --lockfile-only' || fail "lint does not check the lockfile against package.json"; ok
 # doc-coverage.sh behaviour, in a throwaway repository: the 90 % floor, the companion `type` and
 # re-export lines not counted, a file at the src/ root seen, no export at all refused.
 dc="$work/dc"; mkdir -p "$dc/src/domain" && git -C "$dc" init -q
