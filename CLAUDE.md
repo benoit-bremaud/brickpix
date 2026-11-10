@@ -16,8 +16,8 @@ in `docs/architecture/`. Read them before changing anything.
 Bricks 1 (bootstrap), 2 (UML study), 3 (palette) and 4 (import, size, live preview) done. Domain code: the round-tile palette
 (`src/domain/palette.ts`, spec `docs/architecture/specs/palette-round-tiles.md`) and the
 photo-to-mosaic chain (`crop`, `resample`, `colour`, `quantise`, spec
-`docs/architecture/specs/quantise-mosaic.md`). Checks: `pnpm verify`, then
-`pnpm sonar` after push.
+`docs/architecture/specs/quantise-mosaic.md`). Checks: `just check` before a push,
+`just gate` on the pushed head before a merge (ADR-0001, skill `local-ci`).
 
 ## Project invariants
 
@@ -35,6 +35,6 @@ photo-to-mosaic chain (`crop`, `resample`, `colour`, `quantise`, spec
 - Product: `docs/product/` (vision, later personas, journeys and roadmap).
 - Diagrams: `docs/architecture/diagrams/<feature>/`, one folder per feature, six UML types.
 - Domain specs: `docs/architecture/specs/` (data tables the domain implements).
-- Decisions: `docs/architecture/decisions/` (MADR, one per file), once the first one exists.
+- Decisions: `docs/architecture/decisions/` (MADR, one per file; ADR-0001 is the local CI).
 - Logbook: `PROJECT_LOG.md`, updated after every merge.
 - Kanban: GitHub Project #72 (`PVT_kwHOB8rwIc4BoTlZ`), Status Todo / In Progress / Done.
