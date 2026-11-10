@@ -1,0 +1,6 @@
+[Unit]
+Description=Desktop notification when the brickpix nightly local CI fails
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/notify-send --urgency=critical "brickpix local CI nightly failed" "journalctl --user -u brickpix-nightly.service"

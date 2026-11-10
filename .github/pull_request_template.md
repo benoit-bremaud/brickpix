@@ -14,5 +14,5 @@ Closes #
 - [ ] Branch from `main`, Conventional Commit title.
 - [ ] Labels: one `type:*`, one `area:*`, one `prio:*`.
 - [ ] Local review gate (`review-local`, maintainer) run before push, every Must Have resolved.
-- [ ] Pre-merge gate green on the merged SHA (see `CONTRIBUTING.md`).
+- [ ] `just gate` green on the pushed head, merged with `just merge <pr>` (see `CONTRIBUTING.md`).
 - [ ] `PROJECT_LOG.md` updated after merge.

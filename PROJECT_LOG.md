@@ -160,3 +160,30 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   - Gotcha: `pnpm sonar` returned 401 because the agent shell does not source `~/.zshrc`, so
     `SONAR_TOKEN` was unset; reading it from `~/.config/sonarqube/analysis-token` fixed it. The
     `sonarqube` status is a required check with no admin bypass.
+
+## 2026-11-10 — Local CI, one GitHub workflow
+
+- **PR #54** (`ci/53-local-ci-prod-only`): ci(workflows), move every check to local CI and keep
+  only the prod deploy workflow, closes #53. ADR-0001 (`docs/architecture/decisions/`), owner
+  MCDA on `deploy.yml`: `prod.yml` on a signed stable tag + `just deploy` 475/500, no workflow
+  405, keep the push-to-main deploy 135.
+  - Removed: `ci.yml`, `codeql.yml`, `dependency-review.yml`, `gitleaks.yml`, `scorecard.yml`,
+    `deploy.yml`, `pnpm sonar` and `scripts/sonar-status.sh`. Added: `justfile` (tiers `fast`,
+    `check`, `gate`, `nightly`; `sonar`, `smoke`, `rehearse`, `merge`, `deploy staging|prod`,
+    `attest staging`), `lefthook.yml`, `mise.toml` + `mise.lock`, `.nvmrc`, `scripts/attest.sh`,
+    `check-commit-msg.sh`, `doc-coverage.sh`, `smoke.sh`, `toolchain-drift.sh`, the wiring and
+    attestation test suites, the systemd nightly units, `.github/allowed_signers`,
+    `.github/workflows/prod.yml`, `.github/branch-protection.md`, `.github/tag-protection.md`.
+  - Mapping: `pnpm verify` → `just check`; CodeQL → Semgrep CE `p/javascript` + `p/typescript`;
+    dependency review (moderate) → `pnpm audit --audit-level moderate` (the `minimatch` advisory
+    reached through eslint is closed by a pnpm override to 11.0.1); gitleaks-action → gitleaks CLI;
+    Scorecard dropped (GitHub-only).
+  - Staging is now the Worker version alias `staging` deployed from attested `main`
+    (`just deploy staging`), no preview per pull request; production moves on a signed tag
+    `vX.Y.Z` only (`prod.yml`: `classify`, `attest.sh release` of `main`, build, `wrangler deploy`).
+    The Cloudflare secrets stay repository secrets until the owner moves them to a `production`
+    environment.
+  - GitHub: the `main` ruleset requires the `gate` status only (was `verify`, `gitleaks`,
+    `sonarqube`); a ruleset protects `refs/tags/v*`.
+  - Bootstrap merge under the owner's waiver (`allowed_signers` not on `main` before this PR);
+    gate run with `GATE_CI_CHANGE=1` after a human read of the CI files.

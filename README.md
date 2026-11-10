@@ -25,13 +25,16 @@ V1 features delivered (bricks 1–6), all in the browser:
 
 ## Development
 
-Needs Node 22.22.2+, 24.15+ or 26+ (the range jsdom 30 supports, see `engines`) and pnpm 10: `corepack enable` picks the pinned version on Node 22 and 24; Node 25+ no longer ships Corepack, so install it with `npm install -g pnpm@10` there.
+Needs [mise](https://mise.jdx.dev/) (it installs the pinned Node 22, pnpm and the check tools of
+`mise.toml`) and `sonar-scanner` for the merge gate.
 
 ```bash
-pnpm install
-pnpm dev        # local dev server
-pnpm verify     # lint, typecheck, tests with coverage, build (same as CI)
+mise trust && just setup   # toolchain, dependencies, git hooks (once per clone)
+pnpm dev                   # local dev server
+just check                 # lint, typecheck, tests with coverage, build, SAST, audit, secrets
 ```
+
+Every check runs locally (ADR-0001); the only GitHub workflow deploys a signed release tag.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for branches, gates and the release flow.
 

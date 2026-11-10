@@ -9,8 +9,8 @@ validated. If the study is missing, write it first. See [CLAUDE.md](CLAUDE.md).
 
 - One issue, one branch from `main`: `<type>/<issue>-<slug>` (e.g. `chore/1-bootstrap`).
 - [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`.
-- `main` takes no direct commits. A ruleset (enabled right after the first push to `main`)
-  requires a pull request and green checks, and blocks force-pushes and deletion.
+- `main` takes no direct commits. A ruleset requires a pull request and the `gate` commit status,
+  and blocks force-pushes and deletion (`.github/branch-protection.md`).
 
 ## Labels
 
@@ -23,35 +23,54 @@ Every issue and pull request carries one label of each family:
 ## Pull requests
 
 - Fill in the template, link the issue with `Closes #N`, attach the PR to GitHub Project #72.
-- Every review comment gets an inline reply before merge. Squash merge only (the other merge
-  methods are disabled in the repository settings; the branch is deleted on merge).
+- Every review comment gets an inline reply before merge. Squash merge only, through
+  `just merge <pr>` (it refuses a head without the `gate` attestation; the branch is deleted on
+  merge).
 
 ## Gates
 
-**Pre-push** (every branch, no trivial-diff exception): run the local review gate (the maintainer's
-`review-local` agent skill: design, docs, tests, security and correctness review plus a secrets
-scan; report in `docs/architecture/review-local.md`) and resolve every Must Have finding before
-pushing.
+Local CI (ADR-0001, skill `local-ci`): four tiers, one `just` recipe each, no GitHub workflow runs
+on a pull request. Once per clone: `mise trust && just setup` (pinned toolchain of `mise.toml`,
+dependencies, git hooks).
 
-**Pre-merge** (on the merged SHA): test suites, coverage ≥ 80 % and documentation coverage ≥ 90 %,
-SonarQube quality gate, secrets scan and a manual diff read, QA pass on the running product with
-screenshots. All green, or no merge.
+| Tier | Recipe | When | Holds |
+|---|---|---|---|
+| L0 | `just fast` | pre-commit hook | staged files: secrets (gitleaks), eslint, shellcheck, actionlint |
+| L1 | `just check` | pre-push hook, `review-local --push` | eslint with the dependency rule, tsc, tests with coverage ≥ 80 %, doc coverage ≥ 90 %, the local CI wiring tests, build, Semgrep CE, `pnpm audit` (moderate), gitleaks on the history |
+| L2 | `just gate` | on the pushed head, before every merge | L1 + SonarQube quality gate + smoke of the production build + `just rehearse` when `prod.yml` changed, then the signed `gate` attestation on the head SHA |
+| L3 | `just nightly` | systemd user timer (`scripts/systemd/`) | L1 + TruffleHog + toolchain drift |
+
+**Pre-push** (every branch, no trivial-diff exception): the hook runs `just check`; the
+maintainer's `review-local --push` adds the adversarial review (report in
+`docs/architecture/review-local.md`) and resolves every Must Have finding before pushing.
+
+**Pre-merge**: `just gate` green on the pushed head (a branch that changes the gate's own files
+needs `GATE_CI_CHANGE=1` after a human read), every review comment answered inline, then
+`just merge <pr>`. The QA pass on the running product happens on staging after the merge
+(`just deploy staging`), before the release tag.
 
 ## Local checks
 
-- `pnpm verify`: lint (with the dependency rule), type check, tests with coverage, build. The same
-  runs on GitHub as the `verify` check.
-- `pnpm sonar`, after pushing the branch: scans with the local SonarQube and posts the quality gate
-  as the commit status `sonarqube`. Needs the global analysis token in `SONAR_TOKEN` and a
-  SonarQube user token in `~/.config/sonarqube/token`.
+- `just check`: the L1 tier above (`just lint`, `just test`, `just security`, `just secrets` run
+  one part each). `just --list` shows every recipe.
+- `just sonar`: scans with the local SonarQube and waits for the quality gate. Needs
+  `sonar-scanner` on `PATH` and a token in `~/.config/sonar-tokens/brickpix` (or the global
+  analysis token in `~/.config/sonarqube/analysis-token`). Step of `just gate`, needs a fresh
+  `coverage/lcov.info` (`just test`).
+- `just smoke`: builds and serves `dist/` with `vite preview`, checks the page and its bundle.
 
 ## Environments and deployment
 
-GitOps, static profile: `local` is `pnpm dev`; `staging` is the stable Cloudflare Workers preview
-alias every pull request gets, `pr-<N>-brickpix.<subdomain>.workers.dev` (`wrangler versions
-upload --preview-alias`; forks and Dependabot get none); `prod` is the Worker deployed from `main`
-(`wrangler deploy`, configuration in `wrangler.jsonc`). The `deploy` workflow needs the repository
-secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and the Worker must already exist.
+Branching model A (ADR-0001): a single `main`, no staging branch. `local` is `pnpm dev`;
+`staging` is the Worker version alias `staging` (`staging-brickpix.<subdomain>.workers.dev`),
+deployed by `just deploy staging` from an up-to-date, attested `main`, then attested after a
+successful QA pass by `just attest staging`; `prod` is the Worker deployed by the only GitHub
+workflow, `prod.yml`, when a signed stable tag `vX.Y.Z` is pushed: it verifies the tag against
+`.github/allowed_signers`, the `gate` status and the staging note with `scripts/attest.sh release`,
+then builds and runs `wrangler deploy` (configuration in `wrangler.jsonc`). Fallback when Actions
+cannot run: `just deploy prod <tag>` from `main`, logged in `PROJECT_LOG.md`. The workflow needs
+the repository secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`; release tags are
+protected (`.github/tag-protection.md`) and signed (`git tag -s`).
 
 ## Logbook
 
