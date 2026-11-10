@@ -160,3 +160,44 @@ Chronological operational logbook. Complements `git log`: decisions, context, wh
   - Gotcha: `pnpm sonar` returned 401 because the agent shell does not source `~/.zshrc`, so
     `SONAR_TOKEN` was unset; reading it from `~/.config/sonarqube/analysis-token` fixed it. The
     `sonarqube` status is a required check with no admin bypass.
+
+## 2026-11-10 — Local CI, one GitHub workflow
+
+- **PR #55 merged** (`c46cb4a`): ci(workflows), move every check to local CI and keep only the
+  prod deploy workflow, closes #53. ADR-0001 (`docs/architecture/decisions/`), owner MCDA on
+  `deploy.yml`: `prod.yml` on a signed stable tag + `just deploy` 475/500, no workflow 405, keep
+  the push-to-main deploy 135.
+  - Removed: `ci.yml`, `codeql.yml`, `dependency-review.yml`, `gitleaks.yml`, `scorecard.yml`,
+    `deploy.yml`, `pnpm verify`, `pnpm sonar`, `scripts/sonar-status.sh`. Added: `justfile`
+    (tiers `fast`, `check`, `gate`, `nightly`; `sonar`, `smoke`, `rehearse`, `merge`,
+    `deploy staging|prod`, `attest staging`), `lefthook.yml`, `mise.toml` + `mise.lock`, `.nvmrc`,
+    `scripts/attest.sh`, `check-commit-msg.sh`, `doc-coverage.sh`, `smoke.sh`,
+    `toolchain-drift.sh`, the wiring (107 cases) and attestation (39) test suites, the systemd
+    nightly units, `.github/allowed_signers`, `prod.yml`, `branch-protection.md`,
+    `tag-protection.md`.
+  - Mapping: `pnpm verify` → `just check`; CodeQL → Semgrep CE `p/javascript` + `p/typescript`;
+    dependency review (moderate) → `pnpm audit --audit-level moderate` (the `minimatch` advisory
+    reached through eslint closed by a pnpm override to 11.0.1); gitleaks-action → gitleaks CLI;
+    Scorecard dropped (GitHub-only); new: doc coverage ≥ 90 %, smoke of the production build.
+  - Staging is the Worker version alias `staging` deployed from attested `main`
+    (`just deploy staging`), no preview per pull request; production moves on a signed tag
+    `vX.Y.Z` only (`prod.yml`: `classify`, `attest.sh release` of `main`, build without the
+    secrets, `wrangler deploy`). The Cloudflare secrets stay repository secrets until the owner
+    moves them to a `production` environment restricted to `v*` tags.
+  - GitHub: the `main` ruleset (25682220) requires the `gate` status only (was `verify`,
+    `gitleaks`, `sonarqube`); ruleset `release tags` (26949817) protects `refs/tags/v*`.
+  - Review: `docs/architecture/review-local.md`, four adversarial rounds; Must fixed before the
+    push (stale comments, `write gate <sha>` and doc-coverage test cases, tag ruleset, the shared
+    `attest.sh` drift → agents-skills#398), round 2 caught a lockfile left behind by the override
+    change (`just lint` now starts with a frozen `--lockfile-only` install). Follow-ups: #54.
+  - Gate on `47a4aad`: `GATE_CI_CHANGE=1 just gate` green (156 tests, 98.9 % statements, docs
+    94/94, SonarQube passed, smoke OK, `classify` rehearsed with act), attestation written.
+    **Bootstrap waiver** (owner): merged with `gh pr merge --squash` because
+    `.github/allowed_signers` was not on `main` before this PR, so `just merge` could not verify
+    the note; `just gate` re-run on `c46cb4a` afterwards. Every later merge goes through
+    `just merge <pr>`. No optional second review ran; the GitHub Codex connector (a hosted
+    reviewer, excluded by the 2026-11-07 rule) auto-posted a usage-limit notice → #58.
+  - Timing measured on `47a4aad`: L0 0.4 s, L1 22 s, L2 about 3 min.
+  - Owner follow-ups, epic #57: `production` environment for the Cloudflare secrets (then restore
+    `environment:` in `prod.yml`), enable the nightly timer (`scripts/systemd/`), first release
+    `v0.1.0` after `just deploy staging` → QA → `just attest staging`.
